@@ -1031,6 +1031,7 @@
                      NKHO2 = NK
                   ENDIF
 
+
                   ! Same for BrNO3 hydrolysis rxn (jpp, 5/4/10)
                   IF ( XINP(1) == 'BrNO3' ) THEN
                      NKBrNO3 = NK
@@ -1065,7 +1066,22 @@
                   ENDIF
 
                ENDIF
-!
+
+!bjn start
+!For looking at rate constant pertubations
+               !If species 1 is O3 and species 2 is NO from globchem.dat
+               IF (XINP(1) == 'O3' .AND. XINP(2) == 'NO') THEN
+               !Purtubation reaction = reaction numer NK
+                  NKPURT = NK
+               
+                  WRITE (6,*) 'Purterbtation Reaction found', XINP(1),
+     &                 XINP(2)
+               !Set the pertubation constants for O3 and NO
+                  PG=200
+                  PF298=1.11
+               ENDIF
+!bjn end
+
 
                IF (SPECL(1).EQ.'HR')  THEN    !modification of the rate for HO2+RO2
                   NNRO2HO2(NCS)               = NNRO2HO2(NCS) + 1

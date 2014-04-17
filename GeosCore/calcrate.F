@@ -500,17 +500,6 @@
             NK               = NKARR(I,NCS)
             ARRNK            = ARR(NK,NCS)
             DO 35 KLOOP      = 1, KTLOOP
-!bjn start
-! If we have the interesting species, we multiply the ARRNK value by the BEN_ERROR
-! as stated in the JPL book
-               IF (KLOOP == 1) THEN    
-               Ben_Temp = T3K(KLOOP)
-               BEN_F298 = 1d0
-               BEN_G = 1d0
-               BEN_ERROR = 1d0*exp(mod(1d0*(1/298 - 1/Ben_Temp)))
-               RRATE(KLOOP,NK) = ARRNK*BEN_ERROR
-               ELSE
-!bjn end
                RRATE(KLOOP,NK) = ARRNK
  35         CONTINUE
  37      CONTINUE
@@ -540,8 +529,6 @@
  52      CONTINUE
 
 
-!bjn
-! This is for the rate constant sensetivity
 
 
 
@@ -1187,6 +1174,15 @@ c new OH+CO rate from JPL2006.
      &              ARSL1K(XAREA,XRADIUS,XDENA,XSTKCF,XSTK,XSQM)
             ENDDO
          ENDIF
+!bjn start
+!mje perturbation experiments
+         F=PF298*exp(abs(PG*(1./T3K(KLOOP)-1./298.)))
+         RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)*F
+         !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+
+!end mje  
+!bjn end
+
       ENDDO
 
       ENDIF
