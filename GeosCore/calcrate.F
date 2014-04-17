@@ -249,6 +249,9 @@
       REAL*8, POINTER :: SUNCOSmid(:,:)
       REAL*8, POINTER :: T(:,:,:)
 
+!bjn start
+      REAL*8          :: F=0d0 !F is the modification for the rate constant pertubation
+!bjn end
       !=================================================================
       ! CALCRATE begins here!
       !=================================================================
