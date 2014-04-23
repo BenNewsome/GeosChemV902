@@ -1180,7 +1180,7 @@ c new OH+CO rate from JPL2006.
 !bjn start
 !mje perturbation experiments
          F=PF298*exp(abs(PG*(1./T3K(KLOOP)-1./298.)))
-         RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
+         RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)*F
          !RRATE of reaction to pertubate (NKPURT) = RRATE * F
 
 !end mje  

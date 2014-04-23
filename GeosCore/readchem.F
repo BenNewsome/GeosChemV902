@@ -1070,15 +1070,15 @@
 !bjn start
 !For looking at rate constant pertubations
                !If species 1 is O3 and species 2 is NO from globchem.dat
-               IF (XINP(1) == 'O3' .AND. XINP(2) == 'NO') THEN
+               IF (XINP(1) == 'HO2' .AND. XINP(2) == 'NO') THEN
                !Purtubation reaction = reaction numer NK
                   NKPURT = NK
                
                   WRITE (6,*) 'Purterbtation Reaction found', XINP(1),
      &                 XINP(2)
                !Set the pertubation constants for O3 and NO
-                  PG=200
-                  PF298=1.11
+                  PG=20
+                  PF298=1.15
                ENDIF
 !bjn end
 
