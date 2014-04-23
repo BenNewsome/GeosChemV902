@@ -1177,15 +1177,26 @@ c new OH+CO rate from JPL2006.
      &              ARSL1K(XAREA,XRADIUS,XDENA,XSTKCF,XSTK,XSQM)
             ENDDO
          ENDIF
+#if defined( SENSITIVITY )  
 !bjn start
 !mje perturbation experiments
-         F=PF298*exp(abs(PG*(1./T3K(KLOOP)-1./298.)))
-         RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
-         !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+!Only inserted if compiled with Sensetivity=yes
 
+         F=PF298*exp(abs(PG*(1./T3K(KLOOP)-1./298.)))
+         
+         SELECT CASE (Pertubation_direction)
+            CASE (1) !Upper pertubation
+               !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+               RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)*F
+
+            CASE (2) !Lower pertubation
+               !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+               RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
+
+         END SELECT
 !end mje  
 !bjn end
-
+#endif
       ENDDO
 
       ENDIF

@@ -1067,6 +1067,8 @@
 
                ENDIF
 
+
+#if defined( SENSITIVITY )
 !bjn start
 !For looking at rate constant pertubations
                !If species 1 is O3 and species 2 is NO from globchem.dat
@@ -1079,9 +1081,10 @@
                !Set the pertubation constants for O3 and NO
                   PG=20
                   PF298=1.15
+                  Pertubation_direction=1   !Set to 1 for upper or 2 for lower bound
                ENDIF
 !bjn end
-
+#endif
 
                IF (SPECL(1).EQ.'HR')  THEN    !modification of the rate for HO2+RO2
                   NNRO2HO2(NCS)               = NNRO2HO2(NCS) + 1

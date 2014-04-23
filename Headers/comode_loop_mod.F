@@ -424,11 +424,14 @@
      &                   NKGLYC(ICS,2), NKHAC(ICS,2), NKMCO3(ICS,3),
      &                   NKBrNO3,       NKHOBr,       NK1HBr, 
      &                   NK2HOBr,       NK2HBr,       NNRO2HO2(ICS)
+
+#if defined( SENSITIVITY )
 !bjn start
 !adding the variables required for the rate pertubation
-      INTEGER ::         NKPURT,        PG,           PF298
+      INTEGER ::         NKPURT,        PG,           PF298, 
+     &                   Pertubation_Direction
 !bjn end
-
+#endif
 
       INTEGER ::         IH2O,        IOXYGEN,   MB1,      MB2
 
