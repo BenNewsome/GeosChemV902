@@ -169,6 +169,15 @@
 
       INTEGER             :: IU_CHEMDAT ! GLOBCHEM.DAT LUN
 
+!bjn start
+#if defined( SENSITIVITY )
+! Things needed for the rate sensitivity analysis
+      CHARACTER(LEN=70) :: Buffer, LineStart, LineEnd !Pertubation reading
+      CHARACTER(LEN=70) :: Pert_Spec_1, Pert_Spec_2   !Pertubation species
+      INTEGER           :: STAT=0   !Status for the read file
+#endif
+!bjn end
+
 !#if defined( DEVEL )
 !      INTEGER, ALLOCATABLE :: INTVAL(:)
 !#endif
@@ -863,6 +872,67 @@
         ENDIF
        ENDIF
  415  CONTINUE
+
+
+
+#if defined( SENSITIVITY )
+!bjn
+! *********************************************************************
+! Read in Rate Equation Pertubation information
+! *********************************************************************
+
+!open the pertubation file
+
+      OPEN(UNIT=56, FILE="sensetivity.dat", ACTION="read")!Should add error check
+
+      DO
+         READ(56,*) Buffer
+         LineStart = Buffer(1:24)!First 24 charicters of Buffer
+         LineEnd = TRIM(Buffer(25:))!Rest of the line without whitespace
+         IF (STAT /= 0) EXIT
+         SELECT CASE (LineStart)
+            CASE ("Species 1             ::")
+               Pert_Spec_1=TRIM(LineEnd)
+            CASE ("Species 2             ::")
+               Pert_Spec_2=TRIM(LineEnd)
+            CASE ("f(298)                ::")
+               READ(LineEnd,*) PF298
+            CASE ("g                     ::")
+               READ(LineEnd,*) PG
+            CASE ("Pertubation Direction ::")
+               IF (LineEnd == "Upper") THEN
+                  Pertubation_Direction=1
+               ELSE IF (LineEnd == "Lower") THEN
+                  Pertubation_Direction=2
+               ELSE
+                  STOP 'Unsupported Pertubation Direction'
+               END If
+            CASE DEFAULT
+               CYCLE
+         END SELECT 
+      END DO
+
+      WRITE(6,*) "Running with Pertubations"
+      WRITE(6,*) "Pertubating Reaction " , Pert_Spec_1, "+" ,Pert_Spec_2
+      WRITE(6,*) "f(298) = ", PF298, "g = ", PG
+      WRITE(6,*) "Pertubation Direction is ", Pertubation_Direction, 
+     &"(1=up,2=down)"
+
+
+      CLOSE(56)!Should add error check
+      !Write the input to the LOG
+
+!read in species 1
+!read in species 2
+!read in f(298)
+!read in g
+!read in upper or lower pertubation
+!if pertubation="upper": pertubation_direction=1
+!if pertubation="lower": pertubation_direction=2
+!bjn end
+#endif
+
+
 !
 ! *********************************************************************
 ! *             PLACE SPECIAL-RATE INFORMATION INTO ARRAYS            *
@@ -1071,17 +1141,26 @@
 #if defined( SENSITIVITY )
 !bjn start
 !For looking at rate constant pertubations
-               !If species 1 is O3 and species 2 is NO from globchem.dat
-               IF (XINP(1) == 'HO2' .AND. XINP(2) == 'NO') THEN
+
+
+
+
+
+
+
+               !If reaction has species 1 and species 2
+               IF ( (XINP(1) == Pert_Spec_1) .AND. 
+     &                   (XINP(2) == Pert_Spec_2) ) THEN
                !Purtubation reaction = reaction numer NK
                   NKPURT = NK
                
                   WRITE (6,*) 'Purterbtation Reaction found', XINP(1),
      &                 XINP(2)
+               !Moved all this to the read file
                !Set the pertubation constants for O3 and NO
-                  PG=20
-                  PF298=1.15
-                  Pertubation_direction=1   !Set to 1 for upper or 2 for lower bound
+               !   PG=20
+               !   PF298=1.15
+               !   Pertubation_direction=1   !Set to 1 for upper or 2 for lower bound
                ENDIF
 !bjn end
 #endif
