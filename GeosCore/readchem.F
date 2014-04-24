@@ -174,7 +174,7 @@
 ! Things needed for the rate sensitivity analysis
       CHARACTER(LEN=70) :: Buffer, LineStart, LineEnd !Pertubation reading
       CHARACTER(LEN=70) :: Pert_Spec_1, Pert_Spec_2   !Pertubation species
-      INTEGER           :: STAT=0   !Status for the read file
+      INTEGER           :: EOF=0   !End of File Checker
 #endif
 !bjn end
 
@@ -885,35 +885,49 @@
 
       OPEN(UNIT=56, FILE="sensetivity.dat", ACTION="read")!Should add error check
 
-      DO
-         READ(56,*) Buffer
-         LineStart = Buffer(1:24)!First 24 charicters of Buffer
-         LineEnd = TRIM(Buffer(25:))!Rest of the line without whitespace
-         IF (STAT /= 0) EXIT
-         SELECT CASE (LineStart)
-            CASE ("Species 1             ::")
-               Pert_Spec_1=TRIM(LineEnd)
-            CASE ("Species 2             ::")
-               Pert_Spec_2=TRIM(LineEnd)
-            CASE ("f(298)                ::")
-               READ(LineEnd,*) PF298
-            CASE ("g                     ::")
-               READ(LineEnd,*) PG
-            CASE ("Pertubation Direction ::")
-               IF (LineEnd == "Upper") THEN
-                  Pertubation_Direction=1
-               ELSE IF (LineEnd == "Lower") THEN
-                  Pertubation_Direction=2
-               ELSE
-                  STOP 'Unsupported Pertubation Direction'
-               END If
-            CASE DEFAULT
-               CYCLE
-         END SELECT 
+      DO 
+         READ(56,'(A)',IOSTAT=EOF) Buffer
+         IF (EOF > 0 ) THEN
+            STOP 'Something is wrong with sensetivity.dat'
+         ELSE IF (EOF < 0 ) THEN 
+            EXIT  !Check for end of file                
+         ELSE
+            LineStart = Buffer(1:24)!First 24 charicters of Buffer
+            LineEnd = TRIM(ADJUSTL(Buffer(25:)))!Rest of the line without whitespace
+            SELECT CASE (LineStart)
+               CASE ("Species 1             ::")
+                  Pert_Spec_1=TRIM(LineEnd)
+                  WRITE(6,*) "Pertubation Species 1 = ", Pert_Spec_1
+               CASE ("Species 2             ::")
+                  Pert_Spec_2=TRIM(LineEnd)
+                  WRITE(6,*) "Pertubation Species 2 = ", Pert_Spec_2
+               CASE ("f(298)                ::")
+                  READ(LineEnd,*) PF298
+                  WRITE(6,*) "Pertubation f(298) = ", PF298
+               CASE ("g                     ::")
+                  READ(LineEnd,*) PG
+                  WRITE(6,*) "Pertubation g = ", PG
+               CASE ("Pertubation Direction ::")
+                  SELECT CASE (TRIM(LineEnd))                  
+                     CASE ("Upper")
+                        Pertubation_Direction=1
+                        WRITE(6,*) "Pertubation direction is up"
+                     CASE ("Lower")
+                        Pertubation_Direction=2
+                        WRITE(6,*) "Pertubation direction is down"
+                     CASE DEFAULT
+                        WRITE(6,*) "Pertubation = ", LineEnd
+                        STOP 'Unsupported Pertubation Direction'
+                  END SELECT
+               CASE DEFAULT
+                  CYCLE
+            END SELECT 
+         END IF
       END DO
 
       WRITE(6,*) "Running with Pertubations"
-      WRITE(6,*) "Pertubating Reaction " , Pert_Spec_1, "+" ,Pert_Spec_2
+      WRITE(6,*) "Pertubating Reaction " , TRIM(Pert_Spec_1),
+     &           "+" ,TRIM(Pert_Spec_2)
       WRITE(6,*) "f(298) = ", PF298, "g = ", PG
       WRITE(6,*) "Pertubation Direction is ", Pertubation_Direction, 
      &"(1=up,2=down)"
