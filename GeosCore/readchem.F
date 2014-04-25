@@ -175,6 +175,7 @@
       CHARACTER(LEN=70) :: Buffer, LineStart, LineEnd !Pertubation reading
       CHARACTER(LEN=70) :: Pert_Spec_1, Pert_Spec_2   !Pertubation species
       INTEGER           :: EOF=0   !End of File Checker
+      Logical           :: Pertubation_Not_Found = .true. 
 #endif
 !bjn end
 
@@ -601,7 +602,7 @@
 ! *********************************************************************
 
 !open the pertubation file
-
+      WRITE(6,*)"GEOSCHEM::READPERT: Opening sensetivity.dat on unit 56"
       OPEN(UNIT=56, FILE="sensetivity.dat", ACTION="read")!Should add error check
 
       DO 
@@ -616,24 +617,18 @@
             SELECT CASE (LineStart)
                CASE ("Species 1             ::")
                   Pert_Spec_1=TRIM(LineEnd)
-                  WRITE(6,*) "Pertubation Species 1 = ", Pert_Spec_1
                CASE ("Species 2             ::")
                   Pert_Spec_2=TRIM(LineEnd)
-                  WRITE(6,*) "Pertubation Species 2 = ", Pert_Spec_2
                CASE ("f(298)                ::")
                   READ(LineEnd,*) PF298
-                  WRITE(6,*) "Pertubation f(298) = ", PF298
                CASE ("g                     ::")
                   READ(LineEnd,*) PG
-                  WRITE(6,*) "Pertubation g = ", PG
                CASE ("Pertubation Direction ::")
                   SELECT CASE (TRIM(LineEnd))                  
                      CASE ("Upper")
                         Pertubation_Direction=1
-                        WRITE(6,*) "Pertubation direction is up"
                      CASE ("Lower")
                         Pertubation_Direction=2
-                        WRITE(6,*) "Pertubation direction is down"
                      CASE DEFAULT
                         WRITE(6,*) "Pertubation = ", LineEnd
                         STOP 'Unsupported Pertubation Direction'
@@ -644,11 +639,11 @@
          END IF
       END DO
 
-      WRITE(6,*) "Running with Pertubations"
-      WRITE(6,*) "Pertubating Reaction " , TRIM(Pert_Spec_1),
+      WRITE(6,*)"Running with Pertubations"
+      WRITE(6,*)"Pertubating Reaction " , TRIM(Pert_Spec_1),
      &           "+" ,TRIM(Pert_Spec_2)
-      WRITE(6,*) "f(298) = ", PF298, "g = ", PG
-      WRITE(6,*) "Pertubation Direction is ", Pertubation_Direction, 
+      WRITE(6,*)"f(298) = ", PF298, "g = ", PG
+      WRITE(6,*)"Pertubation Direction is ", Pertubation_Direction, 
      &"(1=up,2=down)"
 
 
@@ -1175,6 +1170,7 @@
                
                   WRITE (6,*) 'Purterbtation Reaction found', XINP(1),
      &                 XINP(2)
+                  Pertubation_Not_found = .False.
                !Moved all this to the read file
                !Set the pertubation constants for O3 and NO
                !   PG=20
@@ -1324,6 +1320,9 @@
  521  FORMAT( 'NMBR   A       B     C     Fv       REACTION' )
  525  FORMAT( 'PHOTOPROCESS REACTIONS FOR ', A,' CHEMISTRY' )   
  526  FORMAT( 'NMBR   DEFP (S-1)                        REACTION' )
+
+
+
 !
 ! *********************************************************************
 ! *                  PRINT OUT REACTION INFORMATION                   *
@@ -1456,6 +1455,8 @@
       FILENAME = TRIM( FILENAME ) // '.rc'
 #endif
 
+
+
       IF ( am_I_Root ) THEN
          WRITE( 6, 300 ) TRIM( FILENAME ), I
  300     FORMAT( 'GEOSCHEM::READCHEM: Opening ', a, ' on unit ', i4 )
@@ -1584,6 +1585,19 @@
          NPHOTALL = 0
 
       ENDIF
+
+
+
+!bjn start
+#if defined( SENSITIVITY )
+      !Check that a pertubation reaction has been found
+      IF (Pertubation_Not_Found) THEN
+         STOP 'Running with Sensitivity but no Pertubation found'
+      END IF
+
+      write(6,*) 'ben was here'
+#endif
+!bjn end
 !
 ! *********************************************************************
 ! *******************   END OF SUBROUTINE READCHEM   ****************** 
