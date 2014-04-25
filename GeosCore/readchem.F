@@ -591,6 +591,82 @@
          END SELECT
 
       ENDDO
+
+
+
+#if defined( SENSITIVITY )
+!bjn
+! *********************************************************************
+! Read in Rate Equation Pertubation information
+! *********************************************************************
+
+!open the pertubation file
+
+      OPEN(UNIT=56, FILE="sensetivity.dat", ACTION="read")!Should add error check
+
+      DO 
+         READ(56,'(A)',IOSTAT=EOF) Buffer
+         IF (EOF > 0 ) THEN
+            STOP 'Something is wrong with sensetivity.dat'
+         ELSE IF (EOF < 0 ) THEN 
+            EXIT  !Check for end of file                
+         ELSE
+            LineStart = Buffer(1:24)!First 24 charicters of Buffer
+            LineEnd = TRIM(ADJUSTL(Buffer(25:)))!Rest of the line without whitespace
+            SELECT CASE (LineStart)
+               CASE ("Species 1             ::")
+                  Pert_Spec_1=TRIM(LineEnd)
+                  WRITE(6,*) "Pertubation Species 1 = ", Pert_Spec_1
+               CASE ("Species 2             ::")
+                  Pert_Spec_2=TRIM(LineEnd)
+                  WRITE(6,*) "Pertubation Species 2 = ", Pert_Spec_2
+               CASE ("f(298)                ::")
+                  READ(LineEnd,*) PF298
+                  WRITE(6,*) "Pertubation f(298) = ", PF298
+               CASE ("g                     ::")
+                  READ(LineEnd,*) PG
+                  WRITE(6,*) "Pertubation g = ", PG
+               CASE ("Pertubation Direction ::")
+                  SELECT CASE (TRIM(LineEnd))                  
+                     CASE ("Upper")
+                        Pertubation_Direction=1
+                        WRITE(6,*) "Pertubation direction is up"
+                     CASE ("Lower")
+                        Pertubation_Direction=2
+                        WRITE(6,*) "Pertubation direction is down"
+                     CASE DEFAULT
+                        WRITE(6,*) "Pertubation = ", LineEnd
+                        STOP 'Unsupported Pertubation Direction'
+                  END SELECT
+               CASE DEFAULT
+                  CYCLE
+            END SELECT 
+         END IF
+      END DO
+
+      WRITE(6,*) "Running with Pertubations"
+      WRITE(6,*) "Pertubating Reaction " , TRIM(Pert_Spec_1),
+     &           "+" ,TRIM(Pert_Spec_2)
+      WRITE(6,*) "f(298) = ", PF298, "g = ", PG
+      WRITE(6,*) "Pertubation Direction is ", Pertubation_Direction, 
+     &"(1=up,2=down)"
+
+
+      CLOSE(56)!Should add error check
+      !Write the input to the LOG
+
+!read in species 1
+!read in species 2
+!read in f(298)
+!read in g
+!read in upper or lower pertubation
+!if pertubation="upper": pertubation_direction=1
+!if pertubation="lower": pertubation_direction=2
+!bjn end
+#endif
+
+
+
 !
 ! *********************************************************************
 ! *****************    READ IN REACTION RATES   *********************** 
@@ -875,78 +951,6 @@
 
 
 
-#if defined( SENSITIVITY )
-!bjn
-! *********************************************************************
-! Read in Rate Equation Pertubation information
-! *********************************************************************
-
-!open the pertubation file
-
-      OPEN(UNIT=56, FILE="sensetivity.dat", ACTION="read")!Should add error check
-
-      DO 
-         READ(56,'(A)',IOSTAT=EOF) Buffer
-         IF (EOF > 0 ) THEN
-            STOP 'Something is wrong with sensetivity.dat'
-         ELSE IF (EOF < 0 ) THEN 
-            EXIT  !Check for end of file                
-         ELSE
-            LineStart = Buffer(1:24)!First 24 charicters of Buffer
-            LineEnd = TRIM(ADJUSTL(Buffer(25:)))!Rest of the line without whitespace
-            SELECT CASE (LineStart)
-               CASE ("Species 1             ::")
-                  Pert_Spec_1=TRIM(LineEnd)
-                  WRITE(6,*) "Pertubation Species 1 = ", Pert_Spec_1
-               CASE ("Species 2             ::")
-                  Pert_Spec_2=TRIM(LineEnd)
-                  WRITE(6,*) "Pertubation Species 2 = ", Pert_Spec_2
-               CASE ("f(298)                ::")
-                  READ(LineEnd,*) PF298
-                  WRITE(6,*) "Pertubation f(298) = ", PF298
-               CASE ("g                     ::")
-                  READ(LineEnd,*) PG
-                  WRITE(6,*) "Pertubation g = ", PG
-               CASE ("Pertubation Direction ::")
-                  SELECT CASE (TRIM(LineEnd))                  
-                     CASE ("Upper")
-                        Pertubation_Direction=1
-                        WRITE(6,*) "Pertubation direction is up"
-                     CASE ("Lower")
-                        Pertubation_Direction=2
-                        WRITE(6,*) "Pertubation direction is down"
-                     CASE DEFAULT
-                        WRITE(6,*) "Pertubation = ", LineEnd
-                        STOP 'Unsupported Pertubation Direction'
-                  END SELECT
-               CASE DEFAULT
-                  CYCLE
-            END SELECT 
-         END IF
-      END DO
-
-      WRITE(6,*) "Running with Pertubations"
-      WRITE(6,*) "Pertubating Reaction " , TRIM(Pert_Spec_1),
-     &           "+" ,TRIM(Pert_Spec_2)
-      WRITE(6,*) "f(298) = ", PF298, "g = ", PG
-      WRITE(6,*) "Pertubation Direction is ", Pertubation_Direction, 
-     &"(1=up,2=down)"
-
-
-      CLOSE(56)!Should add error check
-      !Write the input to the LOG
-
-!read in species 1
-!read in species 2
-!read in f(298)
-!read in g
-!read in upper or lower pertubation
-!if pertubation="upper": pertubation_direction=1
-!if pertubation="lower": pertubation_direction=2
-!bjn end
-#endif
-
-
 !
 ! *********************************************************************
 ! *             PLACE SPECIAL-RATE INFORMATION INTO ARRAYS            *
@@ -1157,14 +1161,15 @@
 !For looking at rate constant pertubations
 
 
-
-
+!               WRITE(6,*) 'Ben was here'
+!               WRITE(6,*) XINP(1), TRIM(ADJUSTL(Pert_Spec_1))
+!               WRITE(6,*) XINP(2), TRIM(ADJUSTL(Pert_Spec_2))
 
 
 
                !If reaction has species 1 and species 2
-               IF ( (XINP(1) == Pert_Spec_1) .AND. 
-     &                   (XINP(2) == Pert_Spec_2) ) THEN
+               IF ( (XINP(1) == TRIM(ADJUSTL(Pert_Spec_1))) .AND. 
+     &                   (XINP(2) == TRIM(ADJUSTL(Pert_Spec_2))) ) THEN
                !Purtubation reaction = reaction numer NK
                   NKPURT = NK
                
