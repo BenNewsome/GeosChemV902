@@ -497,6 +497,17 @@ ifeq ($(shell [[ "$(NO_ISO)" =~ $(REGEXP) ]] && echo true),true)
 USER_DEFS      += -DNO_ISORROPIA
 endif
 
+
+#------------------------------------------------------------------------------
+# Pre Industrial settings
+#------------------------------------------------------------------------------
+
+# Option for using the preindustrial settings
+REGEXP         :=(^[Yy]|^[Yy][Ee][Ss])
+ifeq ($(shell [[ "$(PREIND)" =~ $(REGEXP) ]] && echo true),true)
+USER_DEFS      += -DPRE_INDUSTRIAL
+endif
+
 #------------------------------------------------------------------------------
 # HPC Settings: Build & use ESMF & MAPL for the Grid-Independent GEOS-Chem
 #------------------------------------------------------------------------------
