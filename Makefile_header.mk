@@ -505,7 +505,7 @@ endif
 # Option for using the preindustrial settings
 REGEXP         :=(^[Yy]|^[Yy][Ee][Ss])
 ifeq ($(shell [[ "$(PREIND)" =~ $(REGEXP) ]] && echo true),true)
-USER_DEFS      += -DPRE_INDUSTRIAL
+USER_DEFS      += -DPreindustrial
 endif
 
 #------------------------------------------------------------------------------
