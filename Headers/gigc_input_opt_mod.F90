@@ -572,6 +572,15 @@ MODULE GIGC_Input_Opt_Mod
      ! field and year (mpayer, 12/13/13)
      !----------------------------------------
      LOGICAL                    :: USE_O3_FROM_MET
+!bjn
+#if defined( Preindustrial )
+     !---------------------------------------
+     ! Pre-industrial MENU field
+     !---------------------------------------
+     LOGICAL                   :: PREIND
+     REAL*8                    :: PREIND_SCALE
+#endif     
+!/bjn
 
   END TYPE OptInput
 !
@@ -1349,6 +1358,18 @@ CONTAINS
     ! Fields for overhead O3
     !----------------------------------------
     Input_Opt%USE_O3_FROM_MET        = .FALSE.
+
+!bjn
+#if defined( Preindustrial )
+    !----------------------------------------
+    ! Preindustrial options
+    !----------------------------------------
+    Input_Opt%PREIND                 = .TRUE.
+    Input_Opt%PREIND_SCALE           = 10d-2 !Sets the value to 10%
+
+    !These all need correctly inputting in from globchem.dat at somepoint.
+#endif
+!/bjn
 
   END SUBROUTINE Set_GIGC_Input_Opt
 !EOC
