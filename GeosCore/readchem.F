@@ -169,15 +169,16 @@
 
       INTEGER             :: IU_CHEMDAT ! GLOBCHEM.DAT LUN
 
-!bjn start
+![bjn start
 #if defined( SENSITIVITY )
 ! Things needed for the rate sensitivity analysis
       CHARACTER(LEN=70) :: Buffer, LineStart, LineEnd !Pertubation reading
       CHARACTER(LEN=70) :: Pert_Spec_1, Pert_Spec_2   !Pertubation species
       INTEGER           :: EOF=0   !End of File Checker
       Logical           :: Pertubation_Not_Found = .true. 
+      INTEGER           :: Sensetivity_File  !Unit file for the sensetivity options
 #endif
-!bjn end
+!bjn] end
 
 !#if defined( DEVEL )
 !      INTEGER, ALLOCATABLE :: INTVAL(:)
@@ -596,17 +597,20 @@
 
 
 #if defined( SENSITIVITY )
-!bjn
+![bjn
 ! *********************************************************************
 ! Read in Rate Equation Pertubation information
 ! *********************************************************************
 
 !open the pertubation file
-      WRITE(6,*)"GEOSCHEM::READPERT: Opening sensetivity.dat on unit 56"
-      OPEN(UNIT=56, FILE="sensetivity.dat", ACTION="read")!Should add error check
+      Sensetivity_File = findFreeLUN()
+      WRITE(6,*)"GEOSCHEM::READPERT: Opening sensetivity.dat on unit",
+     &            Sensetivity_File
+
+      OPEN(UNIT=Sensetivity_File, FILE="sensetivity.dat", ACTION="read")!Should add error check
 
       DO 
-         READ(56,'(A)',IOSTAT=EOF) Buffer
+         READ(Sensetivity_File,'(A)',IOSTAT=EOF) Buffer
          IF (EOF > 0 ) THEN
             STOP 'Something is wrong with sensetivity.dat'
          ELSE IF (EOF < 0 ) THEN 
@@ -616,23 +620,15 @@
             LineEnd = TRIM(ADJUSTL(Buffer(25:)))!Rest of the line without whitespace
             SELECT CASE (LineStart)
                CASE ("Species 1             ::")
-                  Pert_Spec_1=TRIM(LineEnd)
+                  PERT_SPEC_1=TRIM(LineEnd)
                CASE ("Species 2             ::")
-                  Pert_Spec_2=TRIM(LineEnd)
+                  PERT_SPEC_2=TRIM(LineEnd)
                CASE ("f(298)                ::")
                   READ(LineEnd,*) PF298
                CASE ("g                     ::")
                   READ(LineEnd,*) PG
                CASE ("Pertubation Direction ::")
-                  SELECT CASE (TRIM(LineEnd))                  
-                     CASE ("Upper")
-                        Pertubation_Direction=1
-                     CASE ("Lower")
-                        Pertubation_Direction=2
-                     CASE DEFAULT
-                        WRITE(6,*) "Pertubation = ", LineEnd
-                        STOP 'Unsupported Pertubation Direction'
-                  END SELECT
+                  READ(LineEnd,*) PERT_SIGMA_VALUE
                CASE DEFAULT
                   CYCLE
             END SELECT 
@@ -643,12 +639,15 @@
       WRITE(6,*)"Pertubating Reaction " , TRIM(Pert_Spec_1),
      &           "+" ,TRIM(Pert_Spec_2)
       WRITE(6,*)"f(298) = ", PF298, "g = ", PG
-      WRITE(6,*)"Pertubation Direction is ", Pertubation_Direction, 
-     &"(1=up,2=down)"
+      WRITE(6,*)"Sigma Value = ", PERT_SIGMA_VALUE
 
 
       CLOSE(56)!Should add error check
       !Write the input to the LOG
+
+
+!Send input to Input_Opt%
+
 
 !read in species 1
 !read in species 2
@@ -657,7 +656,7 @@
 !read in upper or lower pertubation
 !if pertubation="upper": pertubation_direction=1
 !if pertubation="lower": pertubation_direction=2
-!bjn end
+!bjn] end
 #endif
 
 
@@ -1152,7 +1151,7 @@
 
 
 #if defined( SENSITIVITY )
-!bjn start
+![bjn start
 !For looking at rate constant pertubations
 
 
@@ -1177,7 +1176,7 @@
                !   PF298=1.15
                !   Pertubation_direction=1   !Set to 1 for upper or 2 for lower bound
                ENDIF
-!bjn end
+!bjn] end
 #endif
 
                IF (SPECL(1).EQ.'HR')  THEN    !modification of the rate for HO2+RO2
@@ -1588,7 +1587,7 @@
 
 
 
-!bjn start
+![bjn start
 #if defined( SENSITIVITY )
       !Check that a pertubation reaction has been found
       IF (Pertubation_Not_Found) THEN
@@ -1597,7 +1596,7 @@
 
       write(6,*) 'ben was here'
 #endif
-!bjn end
+!bjn] end
 !
 ! *********************************************************************
 ! *******************   END OF SUBROUTINE READCHEM   ****************** 

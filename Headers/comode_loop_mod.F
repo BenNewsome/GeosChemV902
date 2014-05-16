@@ -429,7 +429,7 @@
 !bjn start
 !adding the variables required for the rate pertubation
       INTEGER ::         NKPURT,        PG,           PF298, 
-     &                   Pertubation_Direction
+     &                   PERT_SIGMA_VALUE
 !bjn end
 #endif
 

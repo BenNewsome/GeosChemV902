@@ -1178,24 +1178,24 @@ c new OH+CO rate from JPL2006.
             ENDDO
          ENDIF
 #if defined( SENSITIVITY )  
-!bjn start
+![bjn start
 !mje perturbation experiments
 !Only inserted if compiled with Sensetivity=yes
+!Calculate the 1 Sigma change
+         F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+!Change the 1 sigma to the required value
+         F = F*ABS( PERT_SIGMA_VALUE )
 
-         F=PF298*exp(abs(PG*(1./T3K(KLOOP)-1./298.)))
-         
-         SELECT CASE (Pertubation_direction)
-            CASE (1) !Upper pertubation
-               !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-               RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)*F
-
-            CASE (2) !Lower pertubation
-               !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-               RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
-
-         END SELECT
+!Multiply if posative sigma, and devide if negative as stateted in JPL
+         IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+            !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+            RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)*F
+         ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+            !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+            RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
+         END IF
 !end mje  
-!bjn end
+!bjn]
 #endif
       ENDDO
 
