@@ -267,10 +267,8 @@
       REAL*8              :: NAPEMISS
 
 !bjn
-#if defined( Preindustrial )
       LOGICAL             :: PREIND
       REAL*8              :: PREIND_SCALE
-#endif
 !/bjn
 
 
@@ -296,10 +294,8 @@
       L3HRBB3             = Input_Opt%L3HRBB3  
       NAPEMISS            = Input_Opt%NAPEMISS
 !bjn
-#if defined( Preindustrial )
       PREIND              = Input_Opt%PREIND
       PREIND_SCALE        = Input_Opt%PREIND_SCALE
-#endif
 !/bjn
 
 
@@ -486,12 +482,10 @@
 
          ENDIF
 !bjn
-#if defined( Preindustrial )
          IF ( PREIND ) THEN
          !Scale the biomass emmisions to a preindustrial value
             BIOMASS = PREIND_SCALE * BIOMASS
          END IF
-#endif
 !/bjn
 
 
