@@ -174,9 +174,12 @@
 ! Things needed for the rate sensitivity analysis
       CHARACTER(LEN=70) :: Buffer, LineStart, LineEnd !Pertubation reading
       CHARACTER(LEN=70) :: Pert_Spec_1, Pert_Spec_2   !Pertubation species
-      INTEGER           :: EOF=0   !End of File Checker
-      Logical           :: Pertubation_Not_Found = .true. 
+      INTEGER           :: EOF   !End of File Checker
+      LOGICAL           :: Pertubation_Not_Found  
       INTEGER           :: Sensetivity_File  !Unit file for the sensetivity options
+
+      EOF = 0
+      Pertubation_Not_Found = .true.
 #endif
 !bjn] end
 
@@ -627,7 +630,7 @@
                   READ(LineEnd,*) PF298
                CASE ("g                     ::")
                   READ(LineEnd,*) PG
-               CASE ("Pertubation Direction ::")
+               CASE ("Sigma Value           ::")
                   READ(LineEnd,*) PERT_SIGMA_VALUE
                CASE DEFAULT
                   CYCLE
@@ -1167,15 +1170,26 @@
                !Purtubation reaction = reaction numer NK
                   NKPURT = NK
                
-                  WRITE (6,*) 'Purterbtation Reaction found', XINP(1),
-     &                 XINP(2)
                   Pertubation_Not_found = .False.
-               !Moved all this to the read file
-               !Set the pertubation constants for O3 and NO
-               !   PG=20
-               !   PF298=1.15
-               !   Pertubation_direction=1   !Set to 1 for upper or 2 for lower bound
+                  WRITE (6,*) 'Purterbtation Reaction found', TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+
                ENDIF
+               
+
+               ! Special cases
+               ! O1D + H2O
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("H2O" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_H2O_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
+               !Write to 6 if pertubation has been found.
+
 !bjn] end
 #endif
 
