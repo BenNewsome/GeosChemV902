@@ -1348,7 +1348,7 @@ c new OH+CO rate from JPL2006.
 #if defined( SENSITIVITY )
 ![bjn
 !Change the O1d + H20 reaction:
-               IF O1d_H2O_pert THEN
+               IF (O1d_H2O_pert) THEN
    
    
                !Calculate the 1 Sigma change

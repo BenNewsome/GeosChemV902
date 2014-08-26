@@ -1171,7 +1171,8 @@
                   NKPURT = NK
                
                   Pertubation_Not_found = .False.
-                  WRITE (6,*) 'Purterbtation Reaction found', TRIM(ADJUSTL(Pert_Spec_1)),
+                  WRITE (6,*) 'Purterbtation Reaction found',
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
      &                   TRIM(ADJUSTL(Pert_Spec_2))
 
                ENDIF
@@ -1184,7 +1185,8 @@
      &                  ("H2O" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
                   O1D_H2O_pert = .true.
                   Pertubation_Not_found = .False.
-                  WRITE (6,*) 'Purterbtation Reaction found', TRIM(ADJUSTL(Pert_Spec_1)),
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
      &                   TRIM(ADJUSTL(Pert_Spec_2))
                ENDIF
 
