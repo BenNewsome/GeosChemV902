@@ -248,10 +248,12 @@
       REAL*8, POINTER :: QL(:,:,:)
       REAL*8, POINTER :: SUNCOSmid(:,:)
       REAL*8, POINTER :: T(:,:,:)
-
+#if defined( SENSITIVITY )
 !bjn start
-      REAL*8          :: F=0d0 !F is the modification for the rate constant pertubation
+      REAL*8          :: F
+      F = 0d0
 !bjn end
+#endif
       !=================================================================
       ! CALCRATE begins here!
       !=================================================================
@@ -1342,6 +1344,30 @@ c new OH+CO rate from JPL2006.
                !========================================================
                RO1DplH2O = 1.63d-10 * EXP( 60.d0*T3I(KLOOP)) *
      $                     CBLK(KLOOP,IH2O)
+
+#if defined( SENSITIVITY )
+![bjn
+!Change the O1d + H20 reaction:
+               IF O1d_H2O_pert THEN
+   
+   
+               !Calculate the 1 Sigma change
+                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               !Change the 1 sigma to the required value
+                  F = F*ABS( PERT_SIGMA_VALUE )
+   
+               !Multiply if posative sigma, and devide if negative as stateted in JPL
+                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+                     RO1DplH2O=RO1dplH2O*F
+                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+                     RO1DplH2O=RO1DplH2O/F
+                  END IF
+               End IF
+!bjn]
+#endif
+
                RO1DplH2  = 1.2e-10 * CONCH2(KLOOP)
                RO1D      = (RO1DplH2O + RO1DplH2 +
      $             2.15d-11 * EXP(110.d0*T3I(KLOOP)) * CONCN2(KLOOP)   +
