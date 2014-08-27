@@ -432,7 +432,8 @@
 !adding the variables required for the rate pertubation
       INTEGER ::         NKPURT 
       REAL*8  ::         PG,           PF298,   PERT_SIGMA_VALUE
-      LOGICAL ::         O1d_H2O_pert
+      LOGICAL ::         O1d_H2O_pert, O1d_H2_pert
+      LOGICAL ::         O1d_CO2_pert, O1d_N2_pert
 !bjn end
 #endif
 
