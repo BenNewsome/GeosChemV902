@@ -1190,6 +1190,39 @@
      &                   TRIM(ADJUSTL(Pert_Spec_2))
                ENDIF
 
+               ! O1D + H2
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("H2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_H2_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
+               ! O1D + N2
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("N2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_N2_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
+               ! O1D + CO2
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("CO2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_CO2_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
                !Write to 6 if pertubation has been found.
 
 !bjn] end
