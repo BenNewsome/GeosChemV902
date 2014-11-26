@@ -22,6 +22,12 @@
       USE CMN_FJ_MOD,   ONLY : JPMAX, JPPJ, JPNL, ZPJ, RNAMES
       USE JV_CMN_MOD,   ONLY : ZJ,    U0,   SZA,  SZAMAX
 
+!bjn start[
+#if defined( SENSITIVITY )
+      USE CMN_FJ_MOD,   ONLY : RNAMES, J_PERT, J_PERT_VALUE
+#endif
+!bjn end]
+
       IMPLICIT NONE
 !
 ! !INPUT PARAMETERS: 
@@ -82,8 +88,10 @@
 !
 ! !LOCAL VARIABLES:
 !
-      INTEGER           :: I, J, JPERT = 21
+      INTEGER           :: I, J
       REAL*8, PARAMETER :: PI = 3.14159265358979324D0
+      J_PERT = 22
+      J_PERT_VALUE = 1.1d0
 
       !=================================================================
       ! PHOTOJ begins here!
@@ -139,8 +147,8 @@
 !bjn start[
 #if defined( SENSITIVITY )
          ! Adds a 10% pertubation to the photolysis reaction we wish to pertubate
-     print "Photolysis pertubation reaction is number", J_PERT
-     print "Photolysis pertuvation reaction name is ",RNAMES(J_PERT)
+      write(6,*),"Photolysis pertubation reaction is number", J_PERT
+      write(6,*),"Photolysis pert rexn name is " ,RNAMES(J_PERT)
 #endif
 !bjn end]
 

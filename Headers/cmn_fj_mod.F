@@ -49,9 +49,9 @@
       REAL*8, ALLOCATABLE :: ZPJ(:,:,:,:)
 
 !bjn start[
-#if defines( SENSITIVITY )
-      INTEGER           :: J_PERT
-      DOUBLE PRECISION  :: J_PERT_VALUE
+#if defined( SENSITIVITY )
+      INTEGER           :: J_PERT = 22
+      DOUBLE PRECISION  :: J_PERT_VALUE = 1.1d0
 #endif
 !bjn end]      
 
