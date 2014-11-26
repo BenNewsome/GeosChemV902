@@ -90,8 +90,6 @@
 !
       INTEGER           :: I, J
       REAL*8, PARAMETER :: PI = 3.14159265358979324D0
-      J_PERT = 22
-      J_PERT_VALUE = 1.1d0
 
       !=================================================================
       ! PHOTOJ begins here!

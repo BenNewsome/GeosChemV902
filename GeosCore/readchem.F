@@ -61,6 +61,12 @@
       USE GIGC_Input_Opt_Mod, ONLY : OptInput
       USE inquireMod,         ONLY : findFreeLUN
 
+!bjn start[
+#if defined( SENSITIVITY )
+      USE CMN_FJ_MOD,         ONLY : J_PERT, J_PERT_VALUE, RNAMES
+#endif
+!bjn end]
+
 !#if defined( DEVEL ) || defined ( ESMF_ )
 !      USE GIGC_MPI_WRAP
 !endif
@@ -632,6 +638,10 @@
                   READ(LineEnd,*) PG
                CASE ("Sigma Value           ::")
                   READ(LineEnd,*) PERT_SIGMA_VALUE
+               CASE ("Photolysis reaction # ::")
+                  READ(LineEnd,*) J_PERT
+               CASE ("Photolysis uncertanty ::")
+                  READ(LineEnd,*) J_PERT_VALUE
                CASE DEFAULT
                   CYCLE
             END SELECT 
@@ -643,6 +653,10 @@
      &           "+" ,TRIM(Pert_Spec_2)
       WRITE(6,*)"f(298) = ", PF298, "g = ", PG
       WRITE(6,*)"Sigma Value = ", PERT_SIGMA_VALUE
+
+      WRITE(6,*) "Pertubating photolysis reaction number", J_PERT
+      WRITE(6,*) J_PERT, " is harvard species ", RNAMES(J_PERT)
+      WRITE(6,*) "Pertubating by ammount ", J_PERT_VALUE
 
 
       CLOSE(56)!Should add error check
