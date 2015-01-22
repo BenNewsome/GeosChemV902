@@ -155,6 +155,7 @@
 
       REAL*8  :: ARRNK,FCVNK,FCT1,FCT2,FCT,XYRAT,BLOG,FEXP,RATE3M
       REAL*8  :: RO1D, RO1DplH2O, RO1DplH2   ! (bhh, jmao, eam, 7/18/11)
+      REAL*8  :: RO1DplN2, RO1DplCO2         ! bjn rate sensetivity extras 2014-08-27
 !      REAL*8  :: CONSTC,RATE2AIR,RATE3H2O,RIS,RST,TBEGIN,TFINISH
       ! CONSTC declared as a parameter by FP (hotp 7/31/09)
       REAL*8  :: RATE2AIR,RATE3H2O,RIS,RST,TBEGIN,TFINISH
@@ -248,7 +249,12 @@
       REAL*8, POINTER :: QL(:,:,:)
       REAL*8, POINTER :: SUNCOSmid(:,:)
       REAL*8, POINTER :: T(:,:,:)
-
+#if defined( SENSITIVITY )
+!bjn start
+      REAL*8          :: F
+      F = 0d0
+!bjn end
+#endif
       !=================================================================
       ! CALCRATE begins here!
       !=================================================================
@@ -528,6 +534,12 @@
  50         CONTINUE
  52      CONTINUE
 
+
+
+
+
+
+
 !
 ! *********************************************************************
 ! ********  MULTIPLY RATES BY CONSTANT SPECIES CONCENTRATIONS  ********
@@ -644,6 +656,13 @@
                RRATE(KLOOP,NK) = RRATE(KLOOP,NK) * CBLK(KLOOP,JOLD) 
  181        CONTINUE
  183     CONTINUE
+
+
+
+
+
+
+
 !
 ! *********************************************************************
 ! *                       SET SPECIAL RATES                           *
@@ -1161,6 +1180,26 @@ c new OH+CO rate from JPL2006.
      &              ARSL1K(XAREA,XRADIUS,XDENA,XSTKCF,XSTK,XSQM)
             ENDDO
          ENDIF
+#if defined( SENSITIVITY )  
+![bjn start
+!mje perturbation experiments
+!Only inserted if compiled with Sensetivity=yes
+!Calculate the 1 Sigma change
+         F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+!Change the 1 sigma to the required value
+         F = F*ABS( PERT_SIGMA_VALUE )
+
+!Multiply if posative sigma, and devide if negative as stateted in JPL
+         IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+            !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+            RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)*F
+         ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+            !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+            RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
+         END IF
+!end mje  
+!bjn]
+#endif
       ENDDO
 
       ENDIF
@@ -1306,10 +1345,106 @@ c new OH+CO rate from JPL2006.
                !========================================================
                RO1DplH2O = 1.63d-10 * EXP( 60.d0*T3I(KLOOP)) *
      $                     CBLK(KLOOP,IH2O)
+
                RO1DplH2  = 1.2e-10 * CONCH2(KLOOP)
+
+               RO1DplN2  = 2.15d-11 * EXP(110.d0*T3I(KLOOP)) * 
+     $                     CONCN2(KLOOP)
+
+               RO1DplCO2 = 3.30d-11 * EXP( 55.d0*T3I(KLOOP)) *
+     $                      CONCO2(KLOOP)
+
+#if defined( SENSITIVITY )
+![bjn
+!Change the O1d + H20 reaction:
+               IF (O1d_H2O_pert) THEN
+   
+   
+               !Calculate the 1 Sigma change
+                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               !Change the 1 sigma to the required value
+                  F = F*ABS( PERT_SIGMA_VALUE )
+   
+               !Multiply if posative sigma, and devide if negative as stateted in JPL
+                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+                     RO1DplH2O=RO1dplH2O*F
+                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+                     RO1DplH2O=RO1DplH2O/F
+                  END IF
+               End IF
+!Change the O1d + H2 reaction:
+               IF (O1d_H2_pert) THEN
+   
+   
+               !Calculate the 1 Sigma change
+                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               !Change the 1 sigma to the required value
+                  F = F*ABS( PERT_SIGMA_VALUE )
+   
+               !Multiply if posative sigma, and devide if negative as stateted in JPL
+                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+                     RO1DplH2=RO1dplH2*F
+                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+                     RO1DplH2=RO1DplH2/F
+                  END IF
+               End IF
+   
+!Change the O1d + H2 reaction:
+               IF (O1d_N2_pert) THEN
+   
+   
+               !Calculate the 1 Sigma change
+                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               !Change the 1 sigma to the required value
+                  F = F*ABS( PERT_SIGMA_VALUE )
+   
+               !Multiply if posative sigma, and devide if negative as stateted in JPL
+                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+                     RO1DplN2=RO1dplN2*F
+                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+                     RO1DplN2=RO1DplN2/F
+                  END IF
+               End IF
+
+!Change the O1d + H2 reaction:
+               IF (O1d_CO2_pert) THEN
+   
+   
+               !Calculate the 1 Sigma change
+                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               !Change the 1 sigma to the required value
+                  F = F*ABS( PERT_SIGMA_VALUE )
+   
+               !Multiply if posative sigma, and devide if negative as stateted in JPL
+                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE * F
+                     RO1DplCO2=RO1dplCO2*F
+                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+               !RRATE of reaction to pertubate (NKPURT) = RRATE / F
+                     RO1DplCO2=RO1DplCO2/F
+                  END IF
+               End IF
+
+!bjn]
+#endif
+
+
+
                RO1D      = (RO1DplH2O + RO1DplH2 +
-     $             2.15d-11 * EXP(110.d0*T3I(KLOOP)) * CONCN2(KLOOP)   +
-     $             3.30d-11 * EXP( 55.d0*T3I(KLOOP)) * CONCO2(KLOOP))
+     $                      RO1DplN2  + RO1DplCO2 )
+
+
+! Added names for the [O1D][N2] and [O1D][CO2] for rate constant pertubations                          
+!     $             2.15d-11 * EXP(110.d0*T3I(KLOOP)) * CONCN2(KLOOP)   +
+!     $             3.30d-11 * EXP( 55.d0*T3I(KLOOP)) * CONCO2(KLOOP))
+
+
                IF (LJO1DH2O) THEN
                   RRATE(KLOOP,NKNH2O) = RRATE(KLOOP,NKNH2O) *
      $                                  RO1DplH2O / RO1D
@@ -1323,6 +1458,9 @@ c new OH+CO rate from JPL2006.
 !     $          ( 1.45d-10 * EXP( 89.d0*T3I(KLOOP)) * CBLK(KLOOP,IH2O) +
 !     $            2.14d-11 * EXP(110.d0*T3I(KLOOP)) * CONCN2(KLOOP)    +
 !     $            3.20d-11 * EXP( 70.d0*T3I(KLOOP)) * CONCO2(KLOOP)    )
+
+
+
 
             ENDDO
          ENDIF

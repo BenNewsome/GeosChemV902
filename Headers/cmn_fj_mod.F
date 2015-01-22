@@ -47,6 +47,16 @@
 
       ! Output J-values
       REAL*8, ALLOCATABLE :: ZPJ(:,:,:,:)
+
+!bjn start[
+#if defined( SENSITIVITY )
+      INTEGER           :: J_PERT
+      DOUBLE PRECISION  :: J_PERT_VALUE
+#endif
+!bjn end]      
+
+
+      
 ! 
 ! !REMARKS:
 !  Based on code from Oliver Wild (9 Jul 1999)

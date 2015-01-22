@@ -530,6 +530,20 @@ MPI_LIB        := -L$(dir $(shell which mpif90))../lib -lmpi -lmpi_cxx -lmpi_f77
 LINK           := $(LINK) -lGIGC $(ESMF_LIB) $(MAPL_LIB) $(MPI_LIB)
 endif
 
+
+#------------------------------------------------------------------------------
+# Rate Pertubation Settings
+#------------------------------------------------------------------------------
+# By Ben bjn
+
+REGEXP         :=(^[Yy]|^[Yy][Ee][Ss])
+ifeq ($(shell [[ "$(SENSITIVITY)" =~ $(REGEXP) ]] && echo true),true)
+USER_DEFS      += -DSENSITIVITY
+endif
+
+
+
+
 #==============================================================================
 # IFORT compilation options (default)
 #==============================================================================

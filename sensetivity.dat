@@ -1,0 +1,16 @@
+This file is for the rate sensetivity data for the chemical reaction rates
+You should be able to write whatever here.
+By Ben J Newsome
+
+These are taken from the JPL book.
+
+Species 1             :: HO2
+Species 2             :: NO
+f(298)                :: 1.15
+g                     :: 20
+
+The options for the Pertubation direction are "Upper" or "Lower". Anything else and the code should complain.
+
+Pertubation Direction :: Upper 
+
+
