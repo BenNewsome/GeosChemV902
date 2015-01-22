@@ -572,6 +572,13 @@ MODULE GIGC_Input_Opt_Mod
      ! field and year (mpayer, 12/13/13)
      !----------------------------------------
      LOGICAL                    :: USE_O3_FROM_MET
+!bjn
+     !---------------------------------------
+     ! Pre-industrial MENU field
+     !---------------------------------------
+     LOGICAL                   :: PREIND
+     REAL*8                    :: PREIND_SCALE
+!/bjn
 
   END TYPE OptInput
 !
@@ -1349,6 +1356,14 @@ CONTAINS
     ! Fields for overhead O3
     !----------------------------------------
     Input_Opt%USE_O3_FROM_MET        = .FALSE.
+
+!bjn
+    !----------------------------------------
+    ! Preindustrial options
+    !----------------------------------------
+    Input_Opt%PREIND                 = .FALSE.  !Default off
+    Input_Opt%PREIND_SCALE           = 0d0      !Default to 100% 
+!/bjn
 
   END SUBROUTINE Set_GIGC_Input_Opt
 !EOC

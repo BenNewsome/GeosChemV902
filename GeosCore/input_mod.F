@@ -63,6 +63,10 @@
 #if defined( TOMAS )
       PRIVATE :: INIT_TOMAS_MICROPHYSICS
 #endif
+!bjn
+      PRIVATE :: READ_PREINDUSTRIAL_MENU
+!/bjn
+
 ! 
 ! !REVISION HISTORY: 
 !  20 Jul 2004 - R. Yantosca - Initial version
@@ -398,6 +402,12 @@
                                    
          ELSE IF ( INDEX( LINE, 'CH4 MENU'         ) > 0 ) THEN 
             CALL READ_CH4_MENU( am_I_Root, Input_Opt, RC )
+
+!bjn
+         ELSE IF ( INDEX( LINE, 'PREIND MENU'      ) > 0 ) THEN
+            CALL READ_PREINDUSTRIAL_MENU( am_I_Root, Input_Opt, RC )
+!/bjn
+
          ELSE IF ( INDEX( LINE, 'END OF FILE'      ) > 0 ) THEN 
             EXIT
 
@@ -2274,6 +2284,7 @@
 ![eml
       INTEGER            :: HISTYR
 !eml]
+
       !=================================================================
       ! READ_EMISSIONS_MENU begins here!
       !=================================================================
@@ -2581,6 +2592,7 @@
       LSOILNOX          = ( LSOILNOX       .and. LEMIS     )
       LFERTILIZERNOX    = ( LFERTILIZERNOX .and. LEMIS     )
 
+
       ! Define these flags for backwards compatibility
       LFOSSIL           = LANTHRO
       LWOODCO           = LBIOFUEL
@@ -2647,6 +2659,7 @@
          ENDIF
 
       ENDIF
+
 
       !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       !%%% Bug fix!  If LEMEPSHIP is turned on but LEMEP is turned %%%
@@ -3000,6 +3013,7 @@
         WRITE( 6, 100 ) 'Use seasalt Br2 emissions?  : ', LSSABr2
         WRITE( 6, 100 ) 'Set day PBL BrO conc to 1ppt: ', LFIX_PBL_BRO
         WRITE( 6, 100 ) 'Bromine emiss scale factor  : ', Br_SCALING
+
       ENDIF
 
       ! FORMAT statements
@@ -7256,6 +7270,93 @@
  100  FORMAT( A, A )
     
       END SUBROUTINE READ_O3PL_MENU
+
+
+!bjn
+!------------------------------------------------------------------------------
+!                  GEOS-Chem Global Chemical Transport Model                  !
+!------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE: read_preindustrial_menu( am_I_Root )
+!
+! !DESCRIPTION: Subroutine READ\_PREINDUSTRIAL\_MENU reads the PREINDUSTRIAL MENU 
+!  section of the GEOS-Chem input file.
+!\\
+!\\
+! !INTERFACE:
+!
+      SUBROUTINE READ_PREINDUSTRIAL_MENU( am_I_Root, Input_Opt, RC )
+!
+! !USES:
+!
+      USE GIGC_ErrCode_Mod
+      USE GIGC_Input_Opt_Mod, ONLY : OptInput
+!
+! !INPUT PARAMETERS:
+!
+      LOGICAL,        INTENT(IN)    :: am_I_Root   ! Is this the root CPU?
+!
+! !INPUT/OUTPUT PARAMETERS:
+!
+      TYPE(OptInput), INTENT(INOUT) :: Input_Opt   ! Input options
+!
+! !OUTPUT PARAMETERS:
+!
+      INTEGER,        INTENT(OUT)   :: RC          ! Success or failure
+! 
+! !REVISION HISTORY: 
+!  2014-05-15 bjn Ben Newsome created
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+!
+! !LOCAL VARIABLES:
+!
+      INTEGER            :: N
+      CHARACTER(LEN=255) :: SUBSTRS(MAXDIM)
+      LOGICAL            :: PREIND
+      REAL*8             :: PREIND_SCALE
+
+      !=================================================================
+      ! READ_PREINDUSTRIAL_MENU begins here!
+      !=================================================================
+
+      ! Preindustrial switch
+      CALL SPLIT_ONE_LINE( SUBSTRS, N, 1, 'read_preindustrial_menu:1' )
+      READ( SUBSTRS(1:N), * ) PREIND
+
+      ! Preindustrial biogenic emmisions scale factor
+      CALL SPLIT_ONE_LINE( SUBSTRS, N, 1, 'read_preindustrial_menu:2' )
+      READ( SUBSTRS(1:N), * ) PREIND_SCALE
+
+      ! Separator line
+      CALL SPLIT_ONE_LINE( SUBSTRS, N, 1, 'read_preindustrial_menu:3' )
+
+      !=================================================================
+      ! Set fields of Input Options object
+      !=================================================================
+      Input_Opt%PREIND        =  PREIND
+      Input_Opt%PREIND_SCALE  =  PREIND_SCALE
+
+      ! Return success
+      RC = GIGC_SUCCESS
+
+      !=================================================================
+      ! Print to screen
+      !=================================================================
+      IF ( am_I_Root ) THEN
+         WRITE( 6, '(/,a)' ) 'PREINDUSTRIAL MENU'
+         WRITE( 6, '(  a)' ) '-----------------'          
+         WRITE( 6, "(A,L2)" ) ' PREINDUSTRIAL RUN          : ', PREIND
+         WRITE( 6, "(A,3F7.3)" ) ' BIOMASS EMMISIONS SCALE    : ',
+     & PREIND_SCALE
+      ENDIF
+    
+      END SUBROUTINE READ_PREINDUSTRIAL_MENU
+!EOC
+!/bjn
+!
 !EOC
 !------------------------------------------------------------------------------
 !                  GEOS-Chem Global Chemical Transport Model                  !
@@ -7568,7 +7669,8 @@
                print*,'LGFED2BB = ',LGFED2BB
                print*,'L8DAYBB  = ',L8DAYBB
 !              print*,'L8DAYBB3 = ',L8DAYBB3
-	    ENDIF
+
+            ENDIF
             CALL ERROR_STOP( MSG, 'READ_CH4_MENU ("input_mod.F")' )
          ENDIF
       ENDIF
@@ -7776,6 +7878,9 @@
 
       END SUBROUTINE READ_POPS_MENU
 !EOC
+
+
+
 #if   defined( APM ) 
 !------------------------------------------------------------------------------
 !                  GEOS-Chem Global Chemical Transport Model                  !

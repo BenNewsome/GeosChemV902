@@ -266,6 +266,12 @@
       LOGICAL             :: LDAYBB3,  L3HRBB3
       REAL*8              :: NAPEMISS
 
+!bjn
+      LOGICAL             :: PREIND
+      REAL*8              :: PREIND_SCALE
+!/bjn
+
+
       !=================================================================
       ! COMPUTE_BIOMASS_EMISSIONS begins here!
       !=================================================================
@@ -287,6 +293,11 @@
       LDAYBB3             = Input_Opt%LDAYBB3
       L3HRBB3             = Input_Opt%L3HRBB3  
       NAPEMISS            = Input_Opt%NAPEMISS
+!bjn
+      PREIND              = Input_Opt%PREIND
+      PREIND_SCALE        = Input_Opt%PREIND_SCALE
+!/bjn
+
 
       ! If there are biomass emissions ...
       IF ( LBIOMASS ) THEN
@@ -470,6 +481,13 @@
             BIOMASS(:,:,IDBNAP ) = BIOMASS(:,:,IDBNAP) * NAPEMISS
 
          ENDIF
+!bjn
+         IF ( PREIND ) THEN
+         !Scale the biomass emmisions to a preindustrial value
+            BIOMASS = PREIND_SCALE * BIOMASS
+         END IF
+!/bjn
+
 
          ! SOAupdate: diagnostic only (hotp 5/23/09)
          ! 2592000d0 is seconds in June

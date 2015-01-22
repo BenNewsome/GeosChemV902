@@ -54,6 +54,7 @@
       USE TRACERID_MOD,         ONLY : SETTRACE
       USE TROPOPAUSE_MOD,       ONLY : SAVE_FULL_TROP
 
+
       IMPLICIT NONE
 !
 ! !INPUT PARAMETERS:
@@ -276,6 +277,11 @@
       LOGICAL       :: LFUTURE
       LOGICAL       :: LSVCSPEC
 
+!bjn Copy preindustrial to a local logical
+      LOGICAL       :: PREIND     
+      REAL*8        :: PREIND_SCALE
+!/bjn
+
       ! Pointers
       ! We need to define local arrays to hold corresponding values 
       ! from the Chemistry State (State_Chm) object. (mpayer, 12/6/12)
@@ -300,6 +306,11 @@
       LVARTROP  = Input_Opt%LVARTROP
       LFUTURE   = Input_Opt%LFUTURE
       LSVCSPEC  = Input_Opt%LSVCSPEC
+
+!bjn Copy preindustrial to a local logical
+      PREIND         = Input_Opt%PREIND      
+      PREIND_SCALE   = Input_Opt%PREIND_SCALE
+!/bjn
 
       ! Do we need to print debug output?
       prtDebug  = ( LPRT .and. am_I_Root )
@@ -469,6 +480,10 @@
             ! (swu, havala, bmy, 1/24/08)
             IF ( LFUTURE ) THEN
                CH4_YEAR = GET_FUTURE_YEAR()
+!bjn 
+            ELSE IF ( PREIND ) THEN
+               CH4_YEAR = 1750
+!/bjn
             ELSE
                CH4_YEAR = GET_YEAR()
             ENDIF
