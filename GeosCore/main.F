@@ -1629,6 +1629,10 @@
       WRITE( 6, '(a)' ) REPEAT( '#', 39 )
 #endif
 
+#if   defined( SENSITIVITY )
+      WRITE(6, '(a)' ) 'Using bjn rate sensetivity'
+#endif
+
       
       !-------------------------------------------------
       ! System time stamp

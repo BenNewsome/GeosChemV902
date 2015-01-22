@@ -61,6 +61,12 @@
       USE GIGC_Input_Opt_Mod, ONLY : OptInput
       USE inquireMod,         ONLY : findFreeLUN
 
+!bjn start[
+#if defined( SENSITIVITY )
+      USE CMN_FJ_MOD,         ONLY : J_PERT, J_PERT_VALUE, RNAMES
+#endif
+!bjn end]
+
 !#if defined( DEVEL ) || defined ( ESMF_ )
 !      USE GIGC_MPI_WRAP
 !endif
@@ -168,6 +174,20 @@
       LOGICAL            :: LPRT
 
       INTEGER             :: IU_CHEMDAT ! GLOBCHEM.DAT LUN
+
+![bjn start
+#if defined( SENSITIVITY )
+! Things needed for the rate sensitivity analysis
+      CHARACTER(LEN=70) :: Buffer, LineStart, LineEnd !Pertubation reading
+      CHARACTER(LEN=70) :: Pert_Spec_1, Pert_Spec_2   !Pertubation species
+      INTEGER           :: EOF   !End of File Checker
+      LOGICAL           :: Pertubation_Not_Found  
+      INTEGER           :: Sensetivity_File  !Unit file for the sensetivity options
+
+      EOF = 0
+      Pertubation_Not_Found = .true.
+#endif
+!bjn] end
 
 !#if defined( DEVEL )
 !      INTEGER, ALLOCATABLE :: INTVAL(:)
@@ -582,6 +602,82 @@
          END SELECT
 
       ENDDO
+
+
+
+#if defined( SENSITIVITY )
+![bjn
+! *********************************************************************
+! Read in Rate Equation Pertubation information
+! *********************************************************************
+
+!open the pertubation file
+      Sensetivity_File = findFreeLUN()
+      WRITE(6,*)"GEOSCHEM::READPERT: Opening sensetivity.dat on unit",
+     &            Sensetivity_File
+
+      OPEN(UNIT=Sensetivity_File, FILE="sensetivity.dat", ACTION="read")!Should add error check
+
+      DO 
+         READ(Sensetivity_File,'(A)',IOSTAT=EOF) Buffer
+         IF (EOF > 0 ) THEN
+            STOP 'Something is wrong with sensetivity.dat'
+         ELSE IF (EOF < 0 ) THEN 
+            EXIT  !Check for end of file                
+         ELSE
+            LineStart = Buffer(1:24)!First 24 charicters of Buffer
+            LineEnd = TRIM(ADJUSTL(Buffer(25:)))!Rest of the line without whitespace
+            SELECT CASE (LineStart)
+               CASE ("Species 1             ::")
+                  PERT_SPEC_1=TRIM(LineEnd)
+               CASE ("Species 2             ::")
+                  PERT_SPEC_2=TRIM(LineEnd)
+               CASE ("f(298)                ::")
+                  READ(LineEnd,*) PF298
+               CASE ("g                     ::")
+                  READ(LineEnd,*) PG
+               CASE ("Sigma Value           ::")
+                  READ(LineEnd,*) PERT_SIGMA_VALUE
+               CASE ("Photolysis reaction # ::")
+                  READ(LineEnd,*) J_PERT
+               CASE ("Photolysis uncertanty ::")
+                  READ(LineEnd,*) J_PERT_VALUE
+               CASE DEFAULT
+                  CYCLE
+            END SELECT 
+         END IF
+      END DO
+
+      WRITE(6,*)"Running with Pertubations"
+      WRITE(6,*)"Pertubating Reaction " , TRIM(Pert_Spec_1),
+     &           "+" ,TRIM(Pert_Spec_2)
+      WRITE(6,*)"f(298) = ", PF298, "g = ", PG
+      WRITE(6,*)"Sigma Value = ", PERT_SIGMA_VALUE
+
+      WRITE(6,*) "Pertubating photolysis reaction number", J_PERT
+      WRITE(6,*) J_PERT, " is harvard species ", RNAMES(J_PERT)
+      WRITE(6,*) "Pertubating by ammount ", J_PERT_VALUE
+
+
+      CLOSE(56)!Should add error check
+      !Write the input to the LOG
+
+
+!Send input to Input_Opt%
+
+
+!read in species 1
+!read in species 2
+!read in f(298)
+!read in g
+!read in upper or lower pertubation
+!if pertubation="upper": pertubation_direction=1
+!if pertubation="lower": pertubation_direction=2
+!bjn] end
+#endif
+
+
+
 !
 ! *********************************************************************
 ! *****************    READ IN REACTION RATES   *********************** 
@@ -863,6 +959,9 @@
         ENDIF
        ENDIF
  415  CONTINUE
+
+
+
 !
 ! *********************************************************************
 ! *             PLACE SPECIAL-RATE INFORMATION INTO ARRAYS            *
@@ -1031,6 +1130,7 @@
                      NKHO2 = NK
                   ENDIF
 
+
                   ! Same for BrNO3 hydrolysis rxn (jpp, 5/4/10)
                   IF ( XINP(1) == 'BrNO3' ) THEN
                      NKBrNO3 = NK
@@ -1065,7 +1165,82 @@
                   ENDIF
 
                ENDIF
-!
+
+
+#if defined( SENSITIVITY )
+![bjn start
+!For looking at rate constant pertubations
+
+
+!               WRITE(6,*) 'Ben was here'
+!               WRITE(6,*) XINP(1), TRIM(ADJUSTL(Pert_Spec_1))
+!               WRITE(6,*) XINP(2), TRIM(ADJUSTL(Pert_Spec_2))
+
+
+
+               !If reaction has species 1 and species 2
+               IF ( (XINP(1) == TRIM(ADJUSTL(Pert_Spec_1))) .AND. 
+     &                   (XINP(2) == TRIM(ADJUSTL(Pert_Spec_2))) ) THEN
+               !Purtubation reaction = reaction numer NK
+                  NKPURT = NK
+               
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found',
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+
+               ENDIF
+               
+
+               ! Special cases
+               ! O1D + H2O
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("H2O" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_H2O_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
+               ! O1D + H2
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("H2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_H2_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
+               ! O1D + N2
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("N2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_N2_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
+               ! O1D + CO2
+
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                  ("CO2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_CO2_pert = .true.
+                  Pertubation_Not_found = .False.
+                  WRITE (6,*) 'Purterbtation Reaction found', 
+     &                   TRIM(ADJUSTL(Pert_Spec_1)),
+     &                   TRIM(ADJUSTL(Pert_Spec_2))
+               ENDIF
+
+               !Write to 6 if pertubation has been found.
+
+!bjn] end
+#endif
 
                IF (SPECL(1).EQ.'HR')  THEN    !modification of the rate for HO2+RO2
                   NNRO2HO2(NCS)               = NNRO2HO2(NCS) + 1
@@ -1207,6 +1382,9 @@
  521  FORMAT( 'NMBR   A       B     C     Fv       REACTION' )
  525  FORMAT( 'PHOTOPROCESS REACTIONS FOR ', A,' CHEMISTRY' )   
  526  FORMAT( 'NMBR   DEFP (S-1)                        REACTION' )
+
+
+
 !
 ! *********************************************************************
 ! *                  PRINT OUT REACTION INFORMATION                   *
@@ -1339,6 +1517,8 @@
       FILENAME = TRIM( FILENAME ) // '.rc'
 #endif
 
+
+
       IF ( am_I_Root ) THEN
          WRITE( 6, 300 ) TRIM( FILENAME ), I
  300     FORMAT( 'GEOSCHEM::READCHEM: Opening ', a, ' on unit ', i4 )
@@ -1467,6 +1647,19 @@
          NPHOTALL = 0
 
       ENDIF
+
+
+
+![bjn start
+#if defined( SENSITIVITY )
+      !Check that a pertubation reaction has been found
+      IF (Pertubation_Not_Found) THEN
+         STOP 'Running with Sensitivity but no Pertubation found'
+      END IF
+
+      write(6,*) 'ben was here'
+#endif
+!bjn] end
 !
 ! *********************************************************************
 ! *******************   END OF SUBROUTINE READCHEM   ****************** 

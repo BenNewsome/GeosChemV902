@@ -19,8 +19,14 @@
 ! !USES:
 !
       USE CMN_SIZE_MOD, ONLY : NDUST, NAER, NRH,  LLPAR
-      USE CMN_FJ_MOD,   ONLY : JPMAX, JPPJ, JPNL, ZPJ
+      USE CMN_FJ_MOD,   ONLY : JPMAX, JPPJ, JPNL, ZPJ, RNAMES
       USE JV_CMN_MOD,   ONLY : ZJ,    U0,   SZA,  SZAMAX
+
+!bjn start[
+#if defined( SENSITIVITY )
+      USE CMN_FJ_MOD,   ONLY : RNAMES, J_PERT, J_PERT_VALUE
+#endif
+!bjn end]
 
       IMPLICIT NONE
 !
@@ -125,9 +131,26 @@
       ! Store in ZPJ (global array) for passing to SMVGEAR
       DO I = 1, JPNL
       DO J = 1, JPPJ
+!bjn start[
+#if defined( SENSITIVITY )
+         ! Adds a 10% pertubation to the photolysis reaction we wish to pertubate
+         IF (J == J_PERT) THEN
+            ZJ(I,J_PERT) = J_PERT_VALUE * ZJ(I,J_PERT)
+         END IF
+#endif
+!bjn end]
          ZPJ(I,J,NLON,NLAT) = ZJ(I,J)
       ENDDO
       ENDDO
+
+   
+!bjn start[
+#if defined( SENSITIVITY )
+         ! Adds a 10% pertubation to the photolysis reaction we wish to pertubate
+      write(6,*),"Photolysis pertubation reaction is number", J_PERT
+      write(6,*),"Photolysis pert rexn name is " ,RNAMES(J_PERT)
+#endif
+!bjn end]
 
       END SUBROUTINE PHOTOJ
 !EOC

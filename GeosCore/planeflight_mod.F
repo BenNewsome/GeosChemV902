@@ -126,7 +126,7 @@
 #else
       INTEGER,           PARAMETER   :: MAXVARS   = 200  !(sfarina, 1/28/13)
 #endif
-      INTEGER,           PARAMETER   :: MAXPOINTS = 10000
+      INTEGER,           PARAMETER   :: MAXPOINTS = 500000
       INTEGER,           PARAMETER   :: MAXREAC   = 50
       INTEGER,           PARAMETER   :: MAXRO2    = 45
       INTEGER,           PARAMETER   :: MAXAN     = 10 ! FP 04/01/2010 (AN) 

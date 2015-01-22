@@ -413,6 +413,7 @@
       ! Add NKO3PHOTH2 to account for the H2 reaction of O1D (bhh, jmao,
       !  eam, 7/18/11)
       !Added NNRO2HO2(jmao, 11/17/2012)
+      ! Added NKSHIPO3 for loss of O3 in ship plumes (cdh, 7/15/2014)
       INTEGER            NNADD1,        NNADDA(ICS),  NNADDB(  ICS), 
      &                   NNADDC(ICS),   NNADDD(ICS),  NNADDK(  ICS), 
      &                   NNADDV(ICS),   NNADDZ,       
@@ -423,7 +424,18 @@
      &                   NKHNO4(ICS),   NKN2O5,       NKHO2, 
      &                   NKGLYC(ICS,2), NKHAC(ICS,2), NKMCO3(ICS,3),
      &                   NKBrNO3,       NKHOBr,       NK1HBr, 
-     &                   NK2HOBr,       NK2HBr,       NNRO2HO2(ICS) 
+     &                   NK2HOBr,       NK2HBr,       NNRO2HO2(ICS),
+     &                   NKSHIP03
+
+#if defined( SENSITIVITY )
+!bjn start
+!adding the variables required for the rate pertubation
+      INTEGER ::         NKPURT 
+      REAL*8  ::         PG,           PF298,   PERT_SIGMA_VALUE
+      LOGICAL ::         O1d_H2O_pert, O1d_H2_pert
+      LOGICAL ::         O1d_CO2_pert, O1d_N2_pert
+!bjn end
+#endif
 
       INTEGER ::         IH2O,        IOXYGEN,   MB1,      MB2
 
