@@ -50,8 +50,8 @@
 
 !bjn start[
 #if defined( SENSITIVITY )
-      INTEGER           :: J_PERT = 22
-      DOUBLE PRECISION  :: J_PERT_VALUE = 1.1d0
+      INTEGER           :: J_PERT
+      DOUBLE PRECISION  :: J_PERT_VALUE
 #endif
 !bjn end]      
 

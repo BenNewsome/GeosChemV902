@@ -134,7 +134,9 @@
 !bjn start[
 #if defined( SENSITIVITY )
          ! Adds a 10% pertubation to the photolysis reaction we wish to pertubate
-         ZJ(I,J_PERT) = J_PERT_VALUE * ZJ(I,J_PERT)
+         IF (J == J_PERT) THEN
+            ZJ(I,J_PERT) = J_PERT_VALUE * ZJ(I,J_PERT)
+         END IF
 #endif
 !bjn end]
          ZPJ(I,J,NLON,NLAT) = ZJ(I,J)
