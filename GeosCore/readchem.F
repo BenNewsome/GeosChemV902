@@ -1179,8 +1179,11 @@
 
 
                !If reaction has species 1 and species 2
-               IF ( (XINP(1) == TRIM(ADJUSTL(Pert_Spec_1))) .AND. 
-     &                   (XINP(2) == TRIM(ADJUSTL(Pert_Spec_2))) ) THEN
+               IF ( ( (XINP(1) == TRIM(ADJUSTL(Pert_Spec_1))) .AND. 
+     &                   (XINP(2) == TRIM(ADJUSTL(Pert_Spec_2))) )
+     &         .OR. ( (XINP(2) == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
+     &                   (XINP(1) == TRIM(ADJUSTL(Pert_Spec_2))) ) )
+     &         THEN
                !Purtubation reaction = reaction numer NK
                   NKPURT = NK
                
@@ -1226,11 +1229,11 @@
      &                   TRIM(ADJUSTL(Pert_Spec_2))
                ENDIF
 
-               ! O1D + CO2
+               ! O1D + O2
 
                IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
-     &                  ("CO2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
-                  O1D_CO2_pert = .true.
+     &                  ("O2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+                  O1D_O2_pert = .true.
                   Pertubation_Not_found = .False.
                   WRITE (6,*) 'Purterbtation Reaction found', 
      &                   TRIM(ADJUSTL(Pert_Spec_1)),
