@@ -155,7 +155,7 @@
 
       REAL*8  :: ARRNK,FCVNK,FCT1,FCT2,FCT,XYRAT,BLOG,FEXP,RATE3M
       REAL*8  :: RO1D, RO1DplH2O, RO1DplH2   ! (bhh, jmao, eam, 7/18/11)
-      REAL*8  :: RO1DplN2, RO1DplCO2         ! bjn rate sensetivity extras 2014-08-27
+      REAL*8  :: RO1DplN2, RO1DplO2         ! bjn rate sensetivity extras 2014-08-27
 !      REAL*8  :: CONSTC,RATE2AIR,RATE3H2O,RIS,RST,TBEGIN,TFINISH
       ! CONSTC declared as a parameter by FP (hotp 7/31/09)
       REAL*8  :: RATE2AIR,RATE3H2O,RIS,RST,TBEGIN,TFINISH
@@ -1351,7 +1351,7 @@ c new OH+CO rate from JPL2006.
                RO1DplN2  = 2.15d-11 * EXP(110.d0*T3I(KLOOP)) * 
      $                     CONCN2(KLOOP)
 
-               RO1DplCO2 = 3.30d-11 * EXP( 55.d0*T3I(KLOOP)) *
+               RO1DplO2 = 3.30d-11 * EXP( 55.d0*T3I(KLOOP)) *
      $                      CONCO2(KLOOP)
 
 #if defined( SENSITIVITY )
@@ -1413,7 +1413,7 @@ c new OH+CO rate from JPL2006.
                End IF
 
 !Change the O1d + H2 reaction:
-               IF (O1d_CO2_pert) THEN
+               IF (O1d_O2_pert) THEN
    
    
                !Calculate the 1 Sigma change
@@ -1424,10 +1424,10 @@ c new OH+CO rate from JPL2006.
                !Multiply if posative sigma, and devide if negative as stateted in JPL
                   IF       ( PERT_SIGMA_VALUE > 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-                     RO1DplCO2=RO1dplCO2*F
+                     RO1DplO2=RO1dplO2*F
                   ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-                     RO1DplCO2=RO1DplCO2/F
+                     RO1DplO2=RO1DplO2/F
                   END IF
                End IF
 
@@ -1437,7 +1437,7 @@ c new OH+CO rate from JPL2006.
 
 
                RO1D      = (RO1DplH2O + RO1DplH2 +
-     $                      RO1DplN2  + RO1DplCO2 )
+     $                      RO1DplN2  + RO1DplO2 )
 
 
 ! Added names for the [O1D][N2] and [O1D][CO2] for rate constant pertubations                          
