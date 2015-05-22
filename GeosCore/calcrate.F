@@ -127,7 +127,9 @@
       USE TRACERID_MOD,       ONLY : IDHO2
       USE TRACERID_MOD,       ONLY : IDTSO4, IDTNIT
 
-      IMPLICIT NONE
+
+      USE inquireMod,         ONLY : findFreeLUN
+
 !
 ! !INPUT PARAMETERS:
 !
@@ -253,6 +255,7 @@
 !bjn start
       REAL*8          :: F
       F = 0d0
+      Logical   :: first_run = .true.
 !bjn end
 #endif
       !=================================================================
@@ -1197,11 +1200,21 @@ c new OH+CO rate from JPL2006.
             !RRATE of reaction to pertubate (NKPURT) = RRATE / F
             RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
          END IF
+      
+      If (first_run) then
+         rate_constant_file = findfreelun()
+         open( unit=rate_constant_file, file="rate_constants.txt" )
+         
+         write(rate_constants_file,*) , NK, RRATE(KLOOP, NK )
+      end if
 !end mje  
+
+
 !bjn]
 #endif
       ENDDO
 
+      first_run = .false.
       ENDIF
 !     ENDIF NCS.EQ.1 OR 2
 !

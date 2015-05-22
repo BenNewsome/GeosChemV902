@@ -1055,6 +1055,11 @@
             CALL GEOS_CHEM_STOP
          ENDIF 
 !
+!bjn[
+
+         chem_rate_file = findFreeLUN()
+         open(unit=chem_rate_file, file="Reaction_rates.txt")
+!bjn]
          DO 420 NCS           = 1, NCSGAS 
             IF (NOUSE(NCS).EQ.0) THEN 
                NK                 = NRATCUR(NCS) 
@@ -1177,7 +1182,6 @@
 !               WRITE(6,*) XINP(2), TRIM(ADJUSTL(Pert_Spec_2))
 
 
-
                !If reaction has species 1 and species 2
                IF ( ( (XINP(1) == TRIM(ADJUSTL(Pert_Spec_1))) .AND. 
      &                   (XINP(2) == TRIM(ADJUSTL(Pert_Spec_2))) )
@@ -1241,7 +1245,7 @@
                ENDIF
 
                !Write to 6 if pertubation has been found.
-
+               write(chem_rate_file,*), XINP(1), XINP(2), XIMP(3), NK
 !bjn] end
 #endif
 
@@ -1364,6 +1368,11 @@
             ENDIF
 !       ENDIF NOUSE(NCS).EQ.0
 !
+!bjn[
+         close(chem_rate_file)
+!bjn]
+
+
  420     CONTINUE
       ENDIF
 !     ENDIF IDOPHOT.EQ.0
