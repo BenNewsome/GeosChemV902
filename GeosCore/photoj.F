@@ -147,8 +147,8 @@
 !bjn start[
 #if defined( SENSITIVITY )
          ! Adds a 10% pertubation to the photolysis reaction we wish to pertubate
-      write(6,*),"Photolysis pertubation reaction is number", J_PERT
-      write(6,*),"Photolysis pert rexn name is " ,RNAMES(J_PERT)
+!      write(6,*),"Photolysis pertubation reaction is number", J_PERT
+!      write(6,*),"Photolysis pert rexn name is " ,RNAMES(J_PERT)
 #endif
 !bjn end]
 

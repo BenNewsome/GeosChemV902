@@ -251,7 +251,9 @@
       REAL*8, POINTER :: T(:,:,:)
 #if defined( SENSITIVITY )
 !bjn start
-      REAL*8          :: F
+      REAL*8 , dimension(IMISC) :: F
+      REAL*8 :: O1d_H2O_F, O1d_H2_F, O1d_N2_F, O1d_O2_F
+      Integer :: L
       F = 0d0
 !bjn end
 #endif
@@ -1188,15 +1190,17 @@ c new OH+CO rate from JPL2006.
          F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
 !Change the 1 sigma to the required value
          F = F*ABS( PERT_SIGMA_VALUE )
-
+         
+         do L=1,IMISC
 !Multiply if posative sigma, and devide if negative as stateted in JPL
-         IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+         IF       ( PERT_SIGMA_VALUE(L) > 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-            RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)*F
-         ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*F(L)
+         ELSE IF  ( PERT_SIGMA_VALUE(L) < 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-            RRATE(KLOOP,NKPURT)=RRATE(KLOOP,NKPURT)/F
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/F(L)
          END IF
+         end do
 !end mje  
 !bjn]
 #endif
@@ -1361,17 +1365,18 @@ c new OH+CO rate from JPL2006.
    
    
                !Calculate the 1 Sigma change
-                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+                  O1d_H2O_F=O1d_H2O_PF298*exp(
+     &                     abs(O1d_H2O_PG*(1d0/T3K(KLOOP)-1d0/298d0)))
                !Change the 1 sigma to the required value
-                  F = F*ABS( PERT_SIGMA_VALUE )
+                  O1d_H2O_F = O1d_H2O_F*ABS( O1d_H2O_sig )
    
                !Multiply if posative sigma, and devide if negative as stateted in JPL
-                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+                  IF       ( O1D_H2O_Sig > 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-                     RO1DplH2O=RO1dplH2O*F
-                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+                     RO1DplH2O=RO1dplH2O*O1d_H2O_F
+                  ELSE IF  ( O1D_H2O_Sig < 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-                     RO1DplH2O=RO1DplH2O/F
+                     RO1DplH2O=RO1DplH2O/O1d_H2O_F
                   END IF
                End IF
 !Change the O1d + H2 reaction:
@@ -1379,17 +1384,18 @@ c new OH+CO rate from JPL2006.
    
    
                !Calculate the 1 Sigma change
-                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               O1D_H2_F=O1D_H2_PF298*exp(
+     &                     abs(O1d_H2_PG*(1d0/T3K(KLOOP)-1d0/298d0)))
                !Change the 1 sigma to the required value
-                  F = F*ABS( PERT_SIGMA_VALUE )
+                 O1d_H2_F = O1d_H2_F*ABS( O1d_H2_sig )
    
                !Multiply if posative sigma, and devide if negative as stateted in JPL
-                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+                  IF       ( O1D_H2_Sig > 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-                     RO1DplH2=RO1dplH2*F
-                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+                     RO1DplH2=RO1dplH2*O1d_H2_F
+                  ELSE IF  ( O1D_H2_Sig < 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-                     RO1DplH2=RO1DplH2/F
+                     RO1DplH2=RO1DplH2/O1d_H2_F
                   END IF
                End IF
    
@@ -1398,17 +1404,18 @@ c new OH+CO rate from JPL2006.
    
    
                !Calculate the 1 Sigma change
-                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               O1D_N2_F=O1D_N2_PF298*exp(
+     &                     abs(O1d_N2_PG*(1d0/T3K(KLOOP)-1d0/298d0)))
                !Change the 1 sigma to the required value
-                  F = F*ABS( PERT_SIGMA_VALUE )
+                 O1d_N2_F = O1d_N2_F*ABS( O1d_N2_sig )
    
                !Multiply if posative sigma, and devide if negative as stateted in JPL
-                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+                  IF       ( O1D_N2_Sig > 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-                     RO1DplN2=RO1dplN2*F
-                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+                     RO1DplN2=RO1dplN2*O1d_N2_F
+                  ELSE IF  ( O1D_N2_Sig < 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-                     RO1DplN2=RO1DplN2/F
+                     RO1DplN2=RO1DplN2/O1d_N2_F
                   END IF
                End IF
 
@@ -1417,17 +1424,18 @@ c new OH+CO rate from JPL2006.
    
    
                !Calculate the 1 Sigma change
-                  F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
+               O1D_O2_F=O1D_O2_PF298*exp(
+     &                     abs(O1d_O2_PG*(1d0/T3K(KLOOP)-1d0/298d0)))
                !Change the 1 sigma to the required value
-                  F = F*ABS( PERT_SIGMA_VALUE )
+                 O1d_O2_F = O1d_O2_F*ABS( O1d_O2_sig )
    
                !Multiply if posative sigma, and devide if negative as stateted in JPL
-                  IF       ( PERT_SIGMA_VALUE > 0 ) THEN
+                  IF       ( O1D_O2_Sig > 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-                     RO1DplO2=RO1dplO2*F
-                  ELSE IF  ( PERT_SIGMA_VALUE < 0 ) THEN
+                     RO1DplO2=RO1dplO2*O1d_O2_F
+                  ELSE IF  ( O1D_O2_Sig < 0 ) THEN
                !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-                     RO1DplO2=RO1DplO2/F
+                     RO1DplO2=RO1DplO2/O1d_O2_F
                   END IF
                End IF
 
