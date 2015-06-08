@@ -179,13 +179,29 @@
 #if defined( SENSITIVITY )
 ! Things needed for the rate sensitivity analysis
       CHARACTER(LEN=70) :: Buffer, LineStart, LineEnd !Pertubation reading
-      CHARACTER(LEN=70) :: Pert_Spec_1, Pert_Spec_2   !Pertubation species
+      CHARACTER(LEN=70), dimension(IMISC) :: Pert_Spec_1, Pert_Spec_2,
+     &                                       Pert_Spec_3   !Pertubation species
+      CHARACTER(LEN=70), dimension(IMISC) :: Pert_Prod_1, Pert_Prod_2,
+     &                                       Pert_Prod_3   !Pertubation product
       INTEGER           :: EOF   !End of File Checker
-      LOGICAL           :: Pertubation_Not_Found  
+      LOGICAL           :: Pertubation_Not_Found  ! Confirmation check
+      LOGICAL           :: Pertubated  ! Check if the current loop is pertubated
       INTEGER           :: Sensetivity_File  !Unit file for the sensetivity options
+      INTEGER           :: chem_rate_file  !Unit file for the sensetivity options
+      INTEGER           :: L !counter for printing out XINP(L)
 
       EOF = 0
       Pertubation_Not_Found = .true.
+      Pertubated = .false.
+      Pert_Spec_1 = ''
+      Pert_Spec_2 = ''
+      Pert_Spec_3 = ''
+      Pert_Prod_1 = ''
+      Pert_Prod_2 = ''
+      Pert_Prod_3 = ''
+
+      chem_rate_file = findFreeLUN()
+      open(unit=chem_rate_file, file="Reaction_rates.txt")
 #endif
 !bjn] end
 
@@ -617,6 +633,7 @@
      &            Sensetivity_File
 
       OPEN(UNIT=Sensetivity_File, FILE="sensetivity.dat", ACTION="read")!Should add error check
+      L=1 !Make sure the counter is at the start
 
       DO 
          READ(Sensetivity_File,'(A)',IOSTAT=EOF) Buffer
@@ -629,19 +646,30 @@
             LineEnd = TRIM(ADJUSTL(Buffer(25:)))!Rest of the line without whitespace
             SELECT CASE (LineStart)
                CASE ("Species 1             ::")
-                  PERT_SPEC_1=TRIM(LineEnd)
+                  PERT_SPEC_1(L)=TRIM(LineEnd)
                CASE ("Species 2             ::")
-                  PERT_SPEC_2=TRIM(LineEnd)
+                  PERT_SPEC_2(L)=TRIM(LineEnd)
+               CASE ("Species 3             ::")
+                  PERT_SPEC_3(L)=TRIM(LineEnd)
+               CASE ("Product 1             ::")
+                  PERT_prod_1(L)=TRIM(LineEnd)
+               CASE ("Product 2             ::")
+                  PERT_prod_2(L)=TRIM(LineEnd)
+               CASE ("Product 3             ::")
+                  PERT_prod_3(L)=TRIM(LineEnd)
                CASE ("f(298)                ::")
-                  READ(LineEnd,*) PF298
+                  READ(LineEnd,*) PF298(L)
                CASE ("g                     ::")
-                  READ(LineEnd,*) PG
+                  READ(LineEnd,*) PG(L)
                CASE ("Sigma Value           ::")
-                  READ(LineEnd,*) PERT_SIGMA_VALUE
+                  READ(LineEnd,*) PERT_SIGMA_VALUE(L)
                CASE ("Photolysis reaction # ::")
                   READ(LineEnd,*) J_PERT
                CASE ("Photolysis uncertanty ::")
                   READ(LineEnd,*) J_PERT_VALUE
+               CASE ("New Reaction          ::")
+                  L = L+1
+                  
                CASE DEFAULT
                   CYCLE
             END SELECT 
@@ -649,17 +677,17 @@
       END DO
 
       WRITE(6,*)"Running with Pertubations"
-      WRITE(6,*)"Pertubating Reaction " , TRIM(Pert_Spec_1),
-     &           "+" ,TRIM(Pert_Spec_2)
-      WRITE(6,*)"f(298) = ", PF298, "g = ", PG
-      WRITE(6,*)"Sigma Value = ", PERT_SIGMA_VALUE
+!      WRITE(6,*)"Pertubating Reaction " , TRIM(Pert_Spec_1),
+!     &           "+" ,TRIM(Pert_Spec_2)
+!      WRITE(6,*)"f(298) = ", PF298, "g = ", PG
+!      WRITE(6,*)"Sigma Value = ", PERT_SIGMA_VALUE
+!
+!      WRITE(6,*) "Pertubating photolysis reaction number", J_PERT
+!      WRITE(6,*) J_PERT, " is harvard species ", RNAMES(J_PERT)
+!      WRITE(6,*) "Pertubating by ammount ", J_PERT_VALUE
 
-      WRITE(6,*) "Pertubating photolysis reaction number", J_PERT
-      WRITE(6,*) J_PERT, " is harvard species ", RNAMES(J_PERT)
-      WRITE(6,*) "Pertubating by ammount ", J_PERT_VALUE
 
-
-      CLOSE(56)!Should add error check
+      CLOSE(Sensetivity_File)!Should add error check
       !Write the input to the LOG
 
 
@@ -985,6 +1013,7 @@
 !  to put emissions into the chemistry, and drydep out of chemistry.
 
 
+
       DO NCS=1,NCSGAS
          IF (NOUSE(NCS) .EQ. 0 ) THEN
             NK                 = NRATCUR(NCS)
@@ -1177,24 +1206,30 @@
 !For looking at rate constant pertubations
 
 
-!               WRITE(6,*) 'Ben was here'
-!               WRITE(6,*) XINP(1), TRIM(ADJUSTL(Pert_Spec_1))
-!               WRITE(6,*) XINP(2), TRIM(ADJUSTL(Pert_Spec_2))
-
+               WRITE(6,*) 'Ben was here'
+               WRITE(6,*), XINP(1), TRIM(ADJUSTL(Pert_Spec_1(1)))
+               WRITE(6,*), XINP(2), TRIM(ADJUSTL(Pert_Spec_2(1)))
+               DO L=1,10
 
                !If reaction has species 1 and species 2
-               IF ( ( (XINP(1) == TRIM(ADJUSTL(Pert_Spec_1))) .AND. 
-     &                   (XINP(2) == TRIM(ADJUSTL(Pert_Spec_2))) )
-     &         .OR. ( (XINP(2) == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
-     &                   (XINP(1) == TRIM(ADJUSTL(Pert_Spec_2))) ) )
+               IF (       (XINP(1) == TRIM(ADJUSTL(Pert_Spec_1(L))))
+     &              .AND. (XINP(2) == TRIM(ADJUSTL(Pert_Spec_2(L)))) 
+     &              .AND. (XINP(3) == TRIM(ADJUSTL(Pert_Spec_3(L)))) 
+!     &              .AND. (XINP(5) == TRIM(ADJUSTL(Pert_Prod_1(L)))) 
+!     &              .AND. (XINP(6) == TRIM(ADJUSTL(Pert_Prod_2(L)))) 
+!     &              .AND. (XINP(7) == TRIM(ADJUSTL(Pert_Prod_3(L)))) 
+     &            ) 
+
+
      &         THEN
                !Purtubation reaction = reaction numer NK
-                  NKPURT = NK
+                  NKPURT(L) = NK
                
                   Pertubation_Not_found = .False.
                   WRITE (6,*) 'Purterbtation Reaction found',
-     &                   TRIM(ADJUSTL(Pert_Spec_1)),
-     &                   TRIM(ADJUSTL(Pert_Spec_2))
+     &                   TRIM(ADJUSTL(Pert_Spec_1(L))),
+     &                   TRIM(ADJUSTL(Pert_Spec_2(L))),
+     &                   TRIM(ADJUSTL(Pert_Spec_3(L)))
 
                ENDIF
                
@@ -1202,50 +1237,75 @@
                ! Special cases
                ! O1D + H2O
 
-               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
-     &                  ("H2O" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1(L)))) .AND.
+     &                  ("H2O" == TRIM(ADJUSTL(Pert_Spec_2(L))))) THEN
                   O1D_H2O_pert = .true.
                   Pertubation_Not_found = .False.
+                  O1d_H2O_PF298 = PF298(L)
+                  O1d_H2O_PG = PG(L)
+                  O1D_H2O_Sig  = PERT_SIGMA_VALUE(L)
                   WRITE (6,*) 'Purterbtation Reaction found', 
-     &                   TRIM(ADJUSTL(Pert_Spec_1)),
-     &                   TRIM(ADJUSTL(Pert_Spec_2))
+     &                   TRIM(ADJUSTL(Pert_Spec_1(L))),
+     &                   TRIM(ADJUSTL(Pert_Spec_2(L)))
                ENDIF
 
                ! O1D + H2
 
-               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
-     &                  ("H2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1(L)))) .AND.
+     &                  ("H2" == TRIM(ADJUSTL(Pert_Spec_2(L))))) THEN
                   O1D_H2_pert = .true.
+                  O1D_H2_PF298 = PF298(L)
+                  O1D_H2_PG = PG(L)
+                  O1D_H2_Sig  = PERT_SIGMA_VALUE(L)
                   Pertubation_Not_found = .False.
                   WRITE (6,*) 'Purterbtation Reaction found', 
-     &                   TRIM(ADJUSTL(Pert_Spec_1)),
-     &                   TRIM(ADJUSTL(Pert_Spec_2))
+     &                   TRIM(ADJUSTL(Pert_Spec_1(L))),
+     &                   TRIM(ADJUSTL(Pert_Spec_2(L)))
                ENDIF
 
                ! O1D + N2
 
-               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
-     &                  ("N2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1(L)))) .AND.
+     &                  ("N2" == TRIM(ADJUSTL(Pert_Spec_2(L))))) THEN
                   O1D_N2_pert = .true.
+                  O1D_N2_PF298 = PF298(L)
+                  O1D_N2_PG   = PG(L)
+                  O1D_N2_Sig  = PERT_SIGMA_VALUE(L)
                   Pertubation_Not_found = .False.
                   WRITE (6,*) 'Purterbtation Reaction found', 
-     &                   TRIM(ADJUSTL(Pert_Spec_1)),
-     &                   TRIM(ADJUSTL(Pert_Spec_2))
+     &                   TRIM(ADJUSTL(Pert_Spec_1(L))),
+     &                   TRIM(ADJUSTL(Pert_Spec_2(L)))
                ENDIF
 
                ! O1D + O2
 
-               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1))) .AND.
-     &                  ("O2" == TRIM(ADJUSTL(Pert_Spec_2)))) THEN
+               IF (("O1D" == TRIM(ADJUSTL(Pert_Spec_1(L)))) .AND.
+     &                  ("O2" == TRIM(ADJUSTL(Pert_Spec_2(L))))) THEN
                   O1D_O2_pert = .true.
+                  O1D_O2_PF298 = PF298(L)
+                  O1D_O2_PG = PG(L)
+                  O1D_O2_Sig = PERT_SIGMA_VALUE(L)
                   Pertubation_Not_found = .False.
                   WRITE (6,*) 'Purterbtation Reaction found', 
-     &                   TRIM(ADJUSTL(Pert_Spec_1)),
-     &                   TRIM(ADJUSTL(Pert_Spec_2))
+     &                   TRIM(ADJUSTL(Pert_Spec_1(L))),
+     &                   TRIM(ADJUSTL(Pert_Spec_2(L)))
                ENDIF
 
+
                !Write to 6 if pertubation has been found.
-               write(chem_rate_file,*), XINP(1), XINP(2), XIMP(3), NK
+               if (NKPURT(L)==NK) THEN
+                  pertubated = .True.
+               endif
+
+               end do! Check for pertubations
+
+               if (pertubated) THEN
+                  write(chem_rate_file,*), NK, (XINP(L), L=1,3)
+     &            ,   'Pertubated'
+               else
+                  write(chem_rate_file,*), NK, (XINP(L), L=1,3)
+               endif
+               Pertubated = .False.
 !bjn] end
 #endif
 
@@ -1368,12 +1428,15 @@
             ENDIF
 !       ENDIF NOUSE(NCS).EQ.0
 !
-!bjn[
-         close(chem_rate_file)
+
+
 !bjn]
 
 
  420     CONTINUE
+
+
+
       ENDIF
 !     ENDIF IDOPHOT.EQ.0
 !
@@ -1670,6 +1733,8 @@
       END IF
 
       write(6,*) 'ben was here'
+
+      close(chem_rate_file)
 #endif
 !bjn] end
 !
