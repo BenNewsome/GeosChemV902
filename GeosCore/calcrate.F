@@ -127,6 +127,9 @@
       USE TRACERID_MOD,       ONLY : IDHO2
       USE TRACERID_MOD,       ONLY : IDTSO4, IDTNIT
 
+![bjn
+      USE inquireMod,         ONLY : findFreeLUN
+!bjn]
       IMPLICIT NONE
 !
 ! !INPUT PARAMETERS:
@@ -255,6 +258,7 @@
       REAL*8 :: O1d_H2O_F, O1d_H2_F, O1d_N2_F, O1d_O2_F
       Integer :: L
       F = 0d0
+      Logical   :: first_run = .true.
 !bjn end
 #endif
       !=================================================================
@@ -1195,17 +1199,28 @@ c new OH+CO rate from JPL2006.
 !Multiply if posative sigma, and devide if negative as stateted in JPL
          IF       ( PERT_SIGMA_VALUE(L) > 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*F(L)
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*F
          ELSE IF  ( PERT_SIGMA_VALUE(L) < 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/F(L)
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/F
          END IF
          end do
+         
+      
+      If (first_run) then
+         rate_constant_file = findfreelun()
+         open( unit=rate_constant_file, file="rate_constants.txt" )
+         
+         write(rate_constants_file,*) , NK, RRATE(KLOOP, NK )
+      end if
 !end mje  
+
+
 !bjn]
 #endif
       ENDDO
 
+      first_run = .false.
       ENDIF
 !     ENDIF NCS.EQ.1 OR 2
 !

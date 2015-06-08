@@ -1084,6 +1084,11 @@
             CALL GEOS_CHEM_STOP
          ENDIF 
 !
+!bjn[
+
+         chem_rate_file = findFreeLUN()
+         open(unit=chem_rate_file, file="Reaction_rates.txt")
+!bjn]
          DO 420 NCS           = 1, NCSGAS 
             IF (NOUSE(NCS).EQ.0) THEN 
                NK                 = NRATCUR(NCS) 
@@ -1214,7 +1219,6 @@
 !     &              .AND. (XINP(6) == TRIM(ADJUSTL(Pert_Prod_2(L)))) 
 !     &              .AND. (XINP(7) == TRIM(ADJUSTL(Pert_Prod_3(L)))) 
      &            ) 
-
 
 
      &         THEN
@@ -1424,6 +1428,9 @@
             ENDIF
 !       ENDIF NOUSE(NCS).EQ.0
 !
+
+
+!bjn]
 
 
  420     CONTINUE
