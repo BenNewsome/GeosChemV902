@@ -1216,8 +1216,7 @@ c new OH+CO rate from JPL2006.
 
 ! Write out the reaction rates of 1 gridbox too a file
       IF (first_run) then
-      DO KLOOP = 1, KTLOOP
-
+         KLOOP=1
          ! 1-D grid box index
          JLOOP = LREORDER(JLOOPLO+KLOOP)
 
@@ -1243,8 +1242,8 @@ c new OH+CO rate from JPL2006.
                write(rate_constant_file,*),NK, RRATE(JLOOP, NK) 
             end do
             close( rate_constant_file )
+            write(6,*) "Rate constant output closed."
          endif
-      enddo
       ENDIF
 
 !bjn[
