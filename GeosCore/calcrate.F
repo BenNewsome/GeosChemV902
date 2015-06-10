@@ -1243,6 +1243,7 @@ c new OH+CO rate from JPL2006.
             end do
             close( rate_constant_file )
             write(6,*) "Rate constant output closed."
+            first_run = .false.
          endif
       ENDIF
 
