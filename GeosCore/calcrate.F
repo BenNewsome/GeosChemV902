@@ -256,9 +256,11 @@
 !bjn start
       REAL*8 , dimension(IMISC) :: F
       REAL*8 :: O1d_H2O_F, O1d_H2_F, O1d_N2_F, O1d_O2_F
-      Integer :: L
+      Integer :: L, rate_constant_file
+      Logical, save   :: first_run = .true.
       F = 0d0
-      Logical   :: first_run = .true.
+
+
 !bjn end
 #endif
       !=================================================================
@@ -1191,36 +1193,76 @@ c new OH+CO rate from JPL2006.
 !mje perturbation experiments
 !Only inserted if compiled with Sensetivity=yes
 !Calculate the 1 Sigma change
-         F=PF298*exp(abs(PG*(1d0/T3K(KLOOP)-1d0/298d0)))
-!Change the 1 sigma to the required value
-         F = F*ABS( PERT_SIGMA_VALUE )
-         
+
          do L=1,IMISC
+         F(L)=PF298(L)*exp(abs(PG(L)*(1d0/T3K(KLOOP)-1d0/298d0)))
+!Change the 1 sigma to the required value
+         F(L) = F(L)*ABS( PERT_SIGMA_VALUE(L) )
+         
 !Multiply if posative sigma, and devide if negative as stateted in JPL
          IF       ( PERT_SIGMA_VALUE(L) > 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*F
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*F(L)
          ELSE IF  ( PERT_SIGMA_VALUE(L) < 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/F
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/F(L)
          END IF
          end do
          
       
-      If (first_run) then
-         rate_constant_file = findfreelun()
-         open( unit=rate_constant_file, file="rate_constants.txt" )
-         
-         write(rate_constants_file,*) , NK, RRATE(KLOOP, NK )
-      end if
 !end mje  
 
-
-!bjn]
-#endif
       ENDDO
 
-      first_run = .false.
+! Write out the reaction rates of 1 gridbox too a file
+      IF (first_run) then
+      DO KLOOP = 1, KTLOOP
+
+         ! 1-D grid box index
+         JLOOP = LREORDER(JLOOPLO+KLOOP)
+
+         ! Added I-J-L indices to archive diagnostic AD52
+         ! jaegle (2/26/09)
+         ! I-J-L indices
+         IX = IXSAVE(JLOOP)
+         IY = IYSAVE(JLOOP)
+         IZ = IZSAVE(JLOOP)
+
+         if ((IX==1).and.(IY==1).and.(IZ==1)) then
+
+            ! find an open file
+            rate_constant_file = findfreelun()
+            write(6,*) "Opening the rate constant output on unit " ,
+     &                rate_constant_file
+            open( unit=rate_constant_file, file="rate_constants.txt" )
+            write(6,*), "Printing the reaction rates"
+            write(rate_constant_file,*), "Number of reactions = ", 
+     &               NTRATES(NCS)
+            write(rate_constant_file,*), "Temperature = ",T3K(KLOOP)
+            do NK=1,NTRATES(NCS)
+               write(rate_constant_file,*),NK, RRATE(JLOOP, NK) 
+            end do
+            close( rate_constant_file )
+         endif
+      enddo
+      ENDIF
+
+!bjn[
+!      If ((first_run) .and. (KLOOP == 1)) then
+!        write(6,*), 'Opening file for rate constants'
+!        rate_constant_file = findfreelun()
+!        open( unit=rate_constant_file, file="rate_constants.txt" )
+!        do L=1,NCS
+!        NK = L
+!        write(rate_constant_file,*) , NK, RRATE(KLOOP, NK )
+!        end do
+!        close( rate_constant_file )
+!        write(6,*), ' First run complete, reactions written out'
+!        first_run = .false.
+!      end if
+!]bjn
+#endif
+!bjn]
       ENDIF
 !     ENDIF NCS.EQ.1 OR 2
 !
@@ -1824,6 +1866,8 @@ c new OH+CO rate from JPL2006.
       NULLIFY( QL        )
       NULLIFY( SUNCOSmid )
       NULLIFY( T         )
+
+
 
 !
 ! *********************************************************************

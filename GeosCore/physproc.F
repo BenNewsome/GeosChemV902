@@ -352,6 +352,13 @@
 !
           CALL CALCRATE( am_I_Root, Input_Opt, 
      &                   State_Met, State_Chm, RC )
+!bjn[
+!            write(6,*) 'BJN ###################'
+!            write(6,*) 'The reaction rates are:'
+!            DO NK = 1, NTRATES(NCS)
+!            write(6,*) RRATE
+!            END DO
+!]bjn
 !
 ! *********************************************************************
 ! *                        SOLVE CHEMICAL ODES                        *
@@ -364,6 +371,7 @@
           call CPU_TIME(start)
           IF ( LKPP ) THEN
              CALL GCKPP_DRIVER(KTLOOP, JLOOPLO, RRATE_FOR_KPP, NSPEC(1))
+
 
           ELSE
              CALL SMVGEAR( am_I_Root, Input_Opt, RC )
@@ -631,6 +639,7 @@
 !------------------------------------------------------------------------------
  855   CONTINUE
  860  CONTINUE
+
 !
 ! *********************************************************************
 ! ********************* END OF SUBROUTINE PHYSPROC.F ******************

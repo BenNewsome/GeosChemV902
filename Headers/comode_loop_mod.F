@@ -430,8 +430,11 @@
 #if defined( SENSITIVITY )
 !bjn start
 !adding the variables required for the rate pertubation
-      INTEGER ::         NKPURT 
-      REAL*8  ::         PG,           PF298,   PERT_SIGMA_VALUE
+      INTEGER, dimension(IMISC) ::         NKPURT 
+      REAL*8 , dimension(IMISC) :: PG,       PF298,   PERT_SIGMA_VALUE
+      REAL*8  :: O1d_N2_PF298, O1D_H2_PF298, O1D_H2O_PF298, O1D_O2_PF298
+      REAL*8  :: O1d_N2_PG, O1D_H2_PG, O1D_H2O_PG, O1D_O2_PG
+      REAL*8  :: O1d_N2_SIG, O1D_H2_SIG, O1D_H2O_SIG, O1D_O2_SIG
       LOGICAL ::         O1d_H2O_pert, O1d_H2_pert
       LOGICAL ::         O1d_O2_pert, O1d_N2_pert
 !bjn end

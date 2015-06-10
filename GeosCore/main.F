@@ -2118,7 +2118,7 @@
 
          ! Open and read A-6 fields
          CALL OPEN_A6_FIELDS( DATE(1), DATE(2), Input_Opt            )
-         CALL GET_A6_FIELDS(  DATE(1), DATE(2), Input_Opt, State_Met )      
+         CALL GET_A6_FIELDS(  DATE(1), DATE(2), Input_Opt, State_Met ) 
 
          ! Since CLDTOPS is an A-6 field, update the
          ! lightning NOx emissions [molec/box/6h]

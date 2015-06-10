@@ -1084,11 +1084,6 @@
             CALL GEOS_CHEM_STOP
          ENDIF 
 !
-!bjn[
-
-         chem_rate_file = findFreeLUN()
-         open(unit=chem_rate_file, file="Reaction_rates.txt")
-!bjn]
          DO 420 NCS           = 1, NCSGAS 
             IF (NOUSE(NCS).EQ.0) THEN 
                NK                 = NRATCUR(NCS) 
