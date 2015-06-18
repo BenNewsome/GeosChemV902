@@ -1208,9 +1208,6 @@
 !For looking at rate constant pertubations
 
 
-               WRITE(6,*) 'Ben was here'
-               WRITE(6,*), XINP(1), TRIM(ADJUSTL(Pert_Spec_1(1)))
-               WRITE(6,*), XINP(2), TRIM(ADJUSTL(Pert_Spec_2(1)))
                DO L=1,10
 
                !If reaction has species 1 and species 2
