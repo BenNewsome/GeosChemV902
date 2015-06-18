@@ -634,6 +634,13 @@
 
       OPEN(UNIT=Sensetivity_File, FILE="sensetivity.dat", ACTION="read")!Should add error check
       L=1 !Make sure the counter is at the start
+      PF298 = 0d0
+      PG = 0d0
+      PERT_SIGMA_VALUE=0d0
+      J_PERT = 0
+      J_PERT_VALUE = 0d0
+
+
 
       DO 
          READ(Sensetivity_File,'(A)',IOSTAT=EOF) Buffer

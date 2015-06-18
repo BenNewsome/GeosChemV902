@@ -259,6 +259,10 @@
       Integer :: L, rate_constant_file
       Logical, save   :: first_run = .true.
       F = 0d0
+      O1d_H2O_F = 0d0
+      O1d_H2_F = 0d0
+      O1d_N2_F = 0d0
+      O1d_O2_F = 0d0
 
 
 !bjn end
