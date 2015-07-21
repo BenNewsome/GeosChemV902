@@ -1201,15 +1201,15 @@ c new OH+CO rate from JPL2006.
          do L=1,IMISC
          F(L)=PF298(L)*exp(abs(PG(L)*(1d0/T3K(KLOOP)-1d0/298d0)))
 !Change the 1 sigma to the required value
-         F(L) = F(L)*ABS( PERT_SIGMA_VALUE(L) )
+         F(L) = ((F(L)-1d0)*ABS( PERT_SIGMA_VALUE(L) )) + 1d0
          
 !Multiply if posative sigma, and devide if negative as stateted in JPL
          IF       ( PERT_SIGMA_VALUE(L) > 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*(1d0+F(L))
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*F(L)
          ELSE IF  ( PERT_SIGMA_VALUE(L) < 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/(1d0+F(L))
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/F(L)
          END IF
          end do
          
