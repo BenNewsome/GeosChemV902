@@ -1206,10 +1206,10 @@ c new OH+CO rate from JPL2006.
 !Multiply if posative sigma, and devide if negative as stateted in JPL
          IF       ( PERT_SIGMA_VALUE(L) > 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE * F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*F(L)
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))*(1d0+F(L))
          ELSE IF  ( PERT_SIGMA_VALUE(L) < 0 ) THEN
             !RRATE of reaction to pertubate (NKPURT) = RRATE / F
-            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/F(L)
+            RRATE(KLOOP,NKPURT(L))=RRATE(KLOOP,NKPURT(L))/(1d0+F(L))
          END IF
          end do
          
